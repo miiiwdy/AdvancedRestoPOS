@@ -35,16 +35,16 @@ class StatusResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                Tables\Columns\ColorColumn::make('nama_status')
+        ->columns([
+                Tables\Columns\TextColumn::make('nama_status')
+                    ->searchable(),
+                Tables\Columns\ColorColumn::make('warna_background_status')
                     ->copyable()
                     ->copyableState(fn(string $state): string => "Color: {$state}")
                     ->searchable(),
                 Tables\Columns\ColorColumn::make('warna_teks_status')
                     ->copyable()
                     ->copyableState(fn(string $state): string => "Color: {$state}")
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('warna_background_status')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

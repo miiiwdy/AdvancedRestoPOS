@@ -30,9 +30,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-row h-screen w-full bg-[#F8F8F8]">
+    <div class="flex flex-row h-screen w-full bg-[#F7F7F7] overflow-y-hidden">
         <!-- kiri -->
-        <div class="flex flex-col w-[70%] h-screen">
+        <div class="flex flex-col w-[80%] h-screen">
             <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4">
                 <div
                     class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8]">
@@ -92,15 +92,112 @@ onMounted(() => {
                 </div>
             </div>
             <!-- search -->
-            <div class="flex items-center justify-center w-[97%] h-auto px-4 bg-white rounded-full h-16 py-2 mx-auto">
+            <div class="flex items-center justify-center w-[97%] h-auto px-4 pr-2 bg-white rounded-full h-16 py-2 mx-auto">
                 <input type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" placeholder="Search something sweet on your mind..."/>
                     <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
                     <i class="bi bi-search text-lg text-current"></i>
                 </div>
             </div>
-
+            <div class="flex flex-wrap flex-row gap-[1.10rem] w-full px-4 py-4 h-full pb-[15%] overflow-auto">
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+                <div class="flex flex-col px-3 py-3 bg-white w-52 h-60 rounded-xl">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6]"></div>
+                    <div class="nama_product text-lg font-semibold text-gray-700 pt-2">Hot Ocha</div>
+                    <div class="flex flex-row w-full justify-between items-center">
+                        <div class="kategori flex items-center justify-center mt-1 px-2 py-0.5 rounded-xl w-fit bg-[#e3fffd] text-[#00a5e0] text-xs font-semibold">Drinks</div>
+                        <div class="harga text-gray-700 font-semibold text-lg">Rp25.000</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="flex w-[30%] h-screen bg-white shadow-2xl shadow-slate-100">
+        <div class="flex w-[25%] h-screen bg-white shadow-2xl shadow-slate-100">
             <p>o</p>
         </div>
     </div>

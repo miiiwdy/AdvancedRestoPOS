@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 const props = defineProps({
     product: Array,
@@ -10,12 +10,27 @@ const props = defineProps({
 const time = ref("");
 const period = ref("");
 const date = ref("");
-const activeMenu = ref("all");
+const activeMenu = ref(1337);
+const searchQuery = ref('');
 
-const toggleActive = (menu) => {
-    if (activeMenu.value !== menu) {
-        activeMenu.value = menu;
-    }
+const filteredAndSortedProducts = computed(() => {
+    return Array.isArray(props.product) ? props.product.filter(barang => {
+        const query = searchQuery.value.toLowerCase();
+        const matchesSearch = barang.nama_product.toLowerCase().includes(query);
+        if (activeMenu.value === 1337) {
+            return matchesSearch;
+        }
+        const matchesCategory = activeMenu.value ? barang.kategoris_id === activeMenu.value : true;
+        return matchesSearch && matchesCategory;
+    }) : [];
+});
+
+const toggleActive = (categoryId) => {
+    activeMenu.value = categoryId;
+};
+const formatCurrency = (value) => {
+    if (!value) return "0";
+    return Number(value).toLocaleString('id-ID');
 };
 const updateDateTime = () => {
     const now = new Date();
@@ -36,8 +51,6 @@ const getProductCount = (categoryId) => {
 onMounted(() => {
     updateDateTime();
     setInterval(updateDateTime, 1000);
-    console.log("Produk:", props.product);
-    console.log("Kategori:", props.kategori);
 });
 </script>
 <style>
@@ -78,8 +91,8 @@ onMounted(() => {
                 </div>
             </div>
             <div class="flex flex-row h-52 w-[100%] px-4 py-4 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap">
-                <div @click="toggleActive('all')" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === 'all' ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
-                    <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === 'all' ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
+                <div @click="toggleActive(1337)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === 1337 ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
+                    <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === 1337 ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                         <i class="ri-restaurant-2-line text-xl text-current"></i>
                     </div>
                     <div class="wrap flex flex-col ml-3 justify-center">
@@ -87,7 +100,6 @@ onMounted(() => {
                         <div class="total_barang_in_kategori text-sm text-gray-500">{{ props.product.length }} items</div>
                     </div>
                 </div>  
-                <!-- Drinks -->
                 <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
                     <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === kategori.id ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                         <i class="ri-cup-line text-xl text-current"></i>
@@ -100,13 +112,13 @@ onMounted(() => {
             </div>
             <!-- search -->
             <div class="flex items-center justify-center w-[97%] h-auto px-4 pr-2 bg-white rounded-full h-16 py-2 mx-auto">
-                <input type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" placeholder="Search something sweet on your mind..."/>
+                <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" placeholder="Search something sweet on your mind..."/>
                     <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
                     <i class="bi bi-search text-lg text-current"></i>
                 </div>
             </div>
             <div class="flex flex-wrap flex-row gap-[1.10rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
-                <div v-for="product in product" :key="product.id" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden">
+                <div v-for="product in filteredAndSortedProducts" :key="product.id" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden">
                     <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
                         <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + product.foto_product" alt="">
                     </div>
@@ -118,7 +130,7 @@ onMounted(() => {
                             {{product.kategori?.nama_kategori}}
                         </div>
                         <div class="harga text-gray-700 font-semibold text-lg">
-                            Rp{{ product.harga_product }}
+                            Rp{{ formatCurrency(product.harga_product) }}
                         </div>
                     </div>
                 </div>

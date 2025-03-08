@@ -133,7 +133,7 @@
     <template>
         <div class="flex flex-row h-screen w-full bg-[#F9F9F9]  overflow-y-hidden no-select">
             <!-- kiri -->
-            <div class="flex flex-col w-[100%] h-screen">
+            <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
                     <div class="flex">
                         <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
@@ -174,7 +174,7 @@
                     </div>  
                     <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
                         <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === kategori.id ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
-                            <i class="ri-cup-line text-xl text-current"></i>
+                            <i class="text-xl text-current" :class="[kategori.icon]"></i>
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
                             <div class="nama_kategori font-semibold text-lg text-gray-700">{{ kategori.nama_kategori}}</div>
@@ -189,7 +189,7 @@
                         <i class="bi bi-search text-lg text-current"></i>
                     </div>
                 </div>
-                <div class="flex flex-wrap flex-row gap-[1.10rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
+                <div class="flex flex-wrap flex-row gap-[1.20rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
                     <div v-for="product in filteredAndSortedProducts" :key="product.id" @click="openModal(product)" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
                         <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
                             <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + product.foto_product" alt="">
@@ -327,7 +327,7 @@
                                 <div class="text-lg text-slate-800">Rp 9.000</div>
                             </div>
                         </div>
-                        <div class="flex flex-row h-auto w-full px-3 pt-2 pb-3 justify-between items-center">
+                        <div class="flex flex-row h-auto w-full px-3 pt-2 pb-5 justify-between items-center">
                         <div class="flex flex-row w-[48.5%] font-[500] text-[#1C8370] bg-[#f2fffc] border border-[#1C8370] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">Promo applied</div>
                             <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#1C8370]">
@@ -341,7 +341,7 @@
                             </div>
                         </div>
                         </div>
-                        <button class="bg-[#2D71F8] w-full h-[4.2rem] text-white px-4 py-4 hover:bg-[#6196ff]">Add to Cart</button>
+                        <button class="bg-[#2D71F8] w-full h-[3.7rem] text-white text-center px-4 py-4 hover:bg-[#6196ff]">Add to Cart</button>
                     </div>
                 </div>
             </transition>

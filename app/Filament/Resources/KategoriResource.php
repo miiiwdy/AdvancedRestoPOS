@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\ColorPicker;
+use Illuminate\Support\Facades\Auth;
 
 class KategoriResource extends Resource
 {
@@ -24,6 +25,10 @@ class KategoriResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Hidden::make('restos_id')
+                    ->default(Auth::user()->restos_id),
+                Forms\Components\Hidden::make('outlets_id')
+                    ->default(Auth::user()->outlets_id),
                 Forms\Components\TextInput::make('icon')
                     ->placeholder('ambil kode icon di https://fontawesome.com/icons/')
                     ->maxLength(255),
@@ -87,7 +92,6 @@ class KategoriResource extends Resource
         return [
             'index' => Pages\ListKategoris::route('/'),
             'create' => Pages\CreateKategori::route('/create'),
-            'edit' => Pages\EditKategori::route('/{record}/edit'),
         ];
     }
 }

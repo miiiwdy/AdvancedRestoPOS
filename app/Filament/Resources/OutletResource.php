@@ -98,7 +98,6 @@ class OutletResource extends Resource
         return [
             'index' => Pages\ListOutlets::route('/'),
             'create' => Pages\CreateOutlet::route('/create'),
-            'edit' => Pages\EditOutlet::route('/{record}/edit'),
         ];
     }
 }

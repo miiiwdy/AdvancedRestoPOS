@@ -82,7 +82,6 @@ class RestoResource extends Resource
         return [
             'index' => Pages\ListRestos::route('/'),
             'create' => Pages\CreateResto::route('/create'),
-            'edit' => Pages\EditResto::route('/{record}/edit'),
         ];
     }
 }

@@ -75,7 +75,6 @@ class KategoriMejaResource extends Resource
         return [
             'index' => Pages\ListKategoriMejas::route('/'),
             'create' => Pages\CreateKategoriMeja::route('/create'),
-            'edit' => Pages\EditKategoriMeja::route('/{record}/edit'),
         ];
     }
 }

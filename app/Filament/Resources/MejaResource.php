@@ -100,7 +100,6 @@ class MejaResource extends Resource
         return [
             'index' => Pages\ListMejas::route('/'),
             'create' => Pages\CreateMeja::route('/create'),
-            'edit' => Pages\EditMeja::route('/{record}/edit'),
         ];
     }
 }

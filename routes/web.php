@@ -20,3 +20,7 @@ Route::get('/', function () {
 Route::get('/home', function () {
     return Inertia::render('Home'); 
 });
+
+Route::get('/pos', function() {
+    return Inertia::render('POS');
+});

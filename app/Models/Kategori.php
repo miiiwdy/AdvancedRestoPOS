@@ -20,4 +20,8 @@ class Kategori extends Model
     {
         return $this->belongsTo(Outlet::class);
     }
+    public function product()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

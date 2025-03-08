@@ -25,6 +25,9 @@ class KategoriMejaResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('nama_kategori_meja')
                     ->maxLength(255),
+                Forms\Components\TextInput::make('max_guest')
+                    ->maxLength(10)
+                    ->numeric(),
             ]);
     }
 
@@ -32,6 +35,10 @@ class KategoriMejaResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('max_guest')
+                    ->badge()
+                    ->color('success')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('nama_kategori_meja')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

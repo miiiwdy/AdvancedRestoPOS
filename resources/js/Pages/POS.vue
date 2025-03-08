@@ -62,7 +62,9 @@
                 return;
             }
             cart.value.push({
+                np: selectedProduct.value.nama_product,
                 kode_product: selectedProduct.value.kode_product,
+                foto_product: selectedProduct.value.foto_product,
                 kategori: selectedProduct.value.kategoris_id,
                 quantity: quantity.value,
                 hb: selectedProduct.value.harga_beli_product,
@@ -275,13 +277,13 @@
                         </div>
                     </div>
                     <div class="h-[50%] overflow-auto">
-                        <div class="flex flex-row w-full h-28 px-3 items border-t-2 border-dashed">
+                        <div v-if="cart.length > 0" v-for="(item, index) in cart" :key="index" class="flex flex-row w-full h-28 px-3 border-dashed" :class="{ 'border-t-2': index !== 0 }">
                             <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-12 w-auto object-contain" src="http://127.0.0.1:8000/storage/01JNS3F661G0SPBSBCSRY9QZ95.png" alt="">
+                                <img class="max-h-12 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + item.foto_product">
                             </div>
-                            <div class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
-                                <div class="text-sm text-slate-800 font-medium">Cold Ocha x 1</div>
-                                <div class="text-sm text-[#2D71F8] font-medium">Rp9.000</div>
+                            <div  class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
+                                <div class="text-sm text-slate-800 font-medium">{{ item.np }} x {{ item.quantity }}</div>
+                                <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt) }}</div>
                                 <div class="flex flex-row mt-2 w-full">
                                     <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
                                         <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
@@ -292,7 +294,7 @@
                                         <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                             <i class="bi bi-dash text-xs"></i>
                                         </div>
-                                        <div class="text-sm">{{ quantity }}</div>
+                                        <div class="text-sm">{{ item.quantity }}</div>
                                         <div @click="increaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                             <i class="bi bi-plus-lg text-xs"></i>
                                         </div>
@@ -300,84 +302,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex flex-row w-full h-28 px-3 items border-t-2 border-dashed">
-                            <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-12 w-auto object-contain" src="http://127.0.0.1:8000/storage/01JNS3F661G0SPBSBCSRY9QZ95.png" alt="">
-                            </div>
-                            <div class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
-                                <div class="text-sm text-slate-800 font-medium">Cold Ocha x 1</div>
-                                <div class="text-sm text-[#2D71F8] font-medium">Rp9.000</div>
-                                <div class="flex flex-row mt-2 w-full">
-                                    <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
-                                        <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
-                                            <i class="ri-pencil-line text-current text-sm text-current"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-[45%] quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
-                                        <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-dash text-xs"></i>
-                                        </div>
-                                        <div class="text-sm">{{ quantity }}</div>
-                                        <div @click="increaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-plus-lg text-xs"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-row w-full h-28 px-3 items border-t-2 border-dashed">
-                            <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-12 w-auto object-contain" src="http://127.0.0.1:8000/storage/01JNS3F661G0SPBSBCSRY9QZ95.png" alt="">
-                            </div>
-                            <div class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
-                                <div class="text-sm text-slate-800 font-medium">Cold Ocha x 1</div>
-                                <div class="text-sm text-[#2D71F8] font-medium">Rp9.000</div>
-                                <div class="flex flex-row mt-2 w-full">
-                                    <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
-                                        <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
-                                            <i class="ri-pencil-line text-current text-sm text-current"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-[45%] quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
-                                        <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-dash text-xs"></i>
-                                        </div>
-                                        <div class="text-sm">{{ quantity }}</div>
-                                        <div @click="increaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-plus-lg text-xs"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-row w-full h-28 px-3 items border-t-2 border-dashed">
-                            <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-12 w-auto object-contain" src="http://127.0.0.1:8000/storage/01JNS3F661G0SPBSBCSRY9QZ95.png" alt="">
-                            </div>
-                            <div class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
-                                <div class="text-sm text-slate-800 font-medium">Cold Ocha x 1</div>
-                                <div class="text-sm text-[#2D71F8] font-medium">Rp9.000</div>
-                                <div class="flex flex-row mt-2 w-full">
-                                    <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
-                                        <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
-                                            <i class="ri-pencil-line text-current text-sm text-current"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-[45%] quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
-                                        <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-dash text-xs"></i>
-                                        </div>
-                                        <div class="text-sm">{{ quantity }}</div>
-                                        <div @click="increaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-plus-lg text-xs"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- <div class="flex flex-row w-full items-center justify-center h-28 px-3 items border-b-2 border-dashed">
+                        <div v-else class="flex flex-row w-full items-center justify-center h-28 px-3 items border-b-2 border-dashed">
                             <div class="text-sm text-gray-400">No Item Selected</div>
-                        </div> -->
+                        </div>
                     </div>
                     <div class="w-full h-[40%] rounded-t-3xl shadow-[0px_-10px_20px_rgba(0,0,0,0.1)] shadow-slate-100">
                         <div class="w-full flex flex-col items-start px-3 pt-5 gap-1 pb-2 border-b-2 border-dashed">

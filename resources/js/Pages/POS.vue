@@ -1,5 +1,5 @@
     <script setup>
-    import { ref, onMounted, computed } from "vue";
+    import { ref, onMounted, computed, watch } from "vue";
 
     const props = defineProps({
         product: Array,
@@ -20,9 +20,11 @@
     const activeMenu = ref(1337);
     const searchQuery = ref('');
     const isModalOpen = ref(false);
+    const isCartNoteModalOpen = ref(false);
     const selectedProduct = ref(null);
+    const selectedCartProduct = ref(null);
     const quantity = ref(1)
-    const note = ref('');
+    var note = ref('');
     const cart = ref([]);
     const showCart = ref(true);
     const guest = ref(0);
@@ -48,6 +50,26 @@
         note.value = '';
         quantity.value = 1;
     };
+    const openCartNoteModal = (item) => {
+        selectedCartProduct.value = item;
+        isCartNoteModalOpen.value = true;
+    };
+
+    const saveNote = () => {
+        if (selectedCartProduct.value) {
+            selectedCartProduct.value.note = note.value;
+        }
+    }
+
+    const closeCartNoteModal = () => {
+        isCartNoteModalOpen.value = false;
+        selectedCartProduct.value = null;
+        note.value = '';
+    };
+
+    watch(selectedCartProduct, (newValue) => {
+        note.value = newValue && newValue.note ? newValue.note : '';
+    }, { deep: true });
 
     const increaseQty = () => {
         quantity.value++
@@ -78,6 +100,7 @@
             cart.value.push({
                 np: selectedProduct.value.nama_product,
                 kode_product: selectedProduct.value.kode_product,
+                deskripsi_product: selectedProduct.value.deskripsi_product,
                 foto_product: selectedProduct.value.foto_product,
                 kategori: selectedProduct.value.kategoris_id,
                 quantity: quantity.value,
@@ -280,7 +303,7 @@
                         </div>
                         <div v-if="selectedProduct">
                             <div class="mt-3 img rounded-2xl w-[95%] m-auto h-44 bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + selectedProduct.foto_product" alt="{{ selectedProduct.kode_product }}">
+                                <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + selectedProduct.foto_product" alt="{{ selectedProduct.kode_product }} {{ selectedProduct.deskripsi_product }}">
                             </div>
                             <div class="flex flex-col mt-1 p-3">
                                 <div class="kategori flex items-center justify-center px-2 py-0.5 rounded-xl w-fit text-xs font-semibold" :style="{ backgroundColor: selectedProduct.kategori?.warna_background_kategori, color: selectedProduct.kategori?.warna_teks_kategori}"> {{selectedProduct.kategori?.nama_kategori}}
@@ -305,6 +328,32 @@
 
                         <div class="flex justify-end mt-3">
                             <button @click="addToCart" class="bg-[#2D71F8] w-full text-white px-4 py-4 rounded-b-2xl hover:bg-[#6196ff]">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cart note Modal -->
+                <div v-if="isCartNoteModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closeCartNoteModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[26rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                            <h2 class="text-normal font-normal"> Item Notes</h2>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeCartNoteModal">
+                                <i class="bi bi-x-lg text-current"></i>
+                            </div>
+                        </div>
+                        <div v-if="selectedCartProduct" >
+                            <div class="mt-3 img rounded-2xl w-[95%] m-auto h-44 bg-[#F5F5F5] flex justify-center items-center">
+                                <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + selectedCartProduct.foto_product" alt="{{ selectedCartProduct.kode_product }}">
+                            </div>
+                            <div class="flex flex-col mt-1 p-3">
+                                <p class="mt-2 text-gray-700 font-semibold text-lg">{{ selectedCartProduct.np }}</p>
+                                <p class="text-gray-500 text-sm">{{ selectedCartProduct.deskripsi_product }}</p>
+                                <textarea v-model="note" class="flex justify-start items-start mt-4 w-full h-16 bg-[#F5F5F5] text-gray-700 text-xs border-none focus:outline-none focus:ring-0 rounded-2xl p-2 text-left align-top placeholder:text-left" type="text" name="" id="" :placeholder="selectedCartProduct.note.length === 0 ? 'Add notes to your order...' : ''"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end mt-3">
+                            <button @click="saveNote" class="bg-[#2D71F8] w-full text-white px-4 py-4 rounded-b-2xl hover:bg-[#6196ff]">Save Note</button>
                         </div>
                     </div>
                 </div>
@@ -348,11 +397,11 @@
                                 <div class="flex flex-row mt-2 w-full justify-between">
                                     <div class="flex flex-row">
                                         <div v-if="item.note.length > 1" class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
-                                            <div class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
+                                            <div @click="openCartNoteModal(item)" class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
                                                 <i class="ri-pencil-line text-current text-sm text-current"></i>
                                             </div>
                                         </div>
-                                        <div v-else class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
+                                        <div v-else @click="openCartNoteModal(item)" class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
                                             <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
                                                 <i class="ri-pencil-line text-current text-sm text-current"></i>
                                             </div>

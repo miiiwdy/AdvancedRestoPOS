@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('nomor_meja')->nullable();
             $table->string('guest')->nullable();
             $table->time('time_used')->nullable();
-            $table->boolean('is_available')->nullable()->default('true');
-            $table->boolean('is_served')->nullable()->default('false');
-            $table->boolean('is_reserved')->nullable()->default('false');
+            $table->boolean('is_available')->nullable()->default(true);
+            $table->boolean('is_served')->nullable()->default(false);
+            $table->boolean('is_reserved')->nullable()->default(false); //tadi diubah ngapus '' didalem default
             $table->timestamps();
         });
     }

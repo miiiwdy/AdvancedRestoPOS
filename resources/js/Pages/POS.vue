@@ -5,6 +5,7 @@
         product: Array,
         kategori: Array,
         namaKasir: String,
+        pajak: Number,
     })
 
     onMounted(() => {
@@ -51,14 +52,18 @@
         }
     };
 
-    const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt, 0);
-
+    const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
+    const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
+    const calculateTotal = () => cart.value.reduce((sum, item) => sum + item.tt_a, 0);
+    
     const addToCart = () => {
         if (selectedProduct.value) {
             const totalHargaPerItem = selectedProduct.value.harga_product;
             const totalHargaBefore = selectedProduct.value.harga_product * quantity.value;
             const existingProductIndex = cart.value.findIndex(item => item.kode_product === selectedProduct.value.kode_product);
-            
+            const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
+            const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
+
             if (existingProductIndex !== -1) {
                 alert('produk sudah ada di keranjang')
                 return;
@@ -71,7 +76,9 @@
                 quantity: quantity.value,
                 hb: selectedProduct.value.harga_beli_product,
                 hj: totalHargaPerItem,
-                tt: totalHargaBefore,
+                tt_b: totalHargaBefore,
+                tt_a: totalHargaAfter,
+                total_pajak: totalPajakPerItem,
                 note: note.value || '',
             })
             console.log(cart);
@@ -285,7 +292,7 @@
                             </div>
                             <div  class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
                                 <div class="text-sm text-slate-800 font-medium">{{ item.np }} x {{ item.quantity }}</div>
-                                <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt) }}</div>
+                                <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
                                 <div class="flex flex-row mt-2 w-full">
                                     <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
                                         <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
@@ -316,7 +323,7 @@
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm text-slate-400">Tax(%)</div>
-                                <div class="text-sm text-slate-400">Rp 9.000</div>
+                                <div class="text-sm text-slate-400">Rp {{ formatCurrency(calculateTotalPajak())}}</div>
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm font-medium text-[#1C8370]">Discount</div>
@@ -326,7 +333,7 @@
                         <div class="w-full flex-col items-start px-3 pt-1">
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-lg text-slate-800">Total</div>
-                                <div class="text-lg text-slate-800">Rp {{formatCurrency(calculateSubtotal())}}</div>
+                                <div class="text-lg text-slate-800">Rp {{formatCurrency(calculateTotal())}}</div>
                             </div>
                         </div>
                         <div class="flex flex-row h-auto w-full px-3 pt-2 pb-5 justify-between items-center">

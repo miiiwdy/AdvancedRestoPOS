@@ -26,6 +26,7 @@
     const showCart = ref(true);
     const guest = ref(0);
     const payment = ref('Payment');
+    var isCooldown = false;
 
     const toggleCart = () => {
     showCart.value = !showCart.value;
@@ -86,6 +87,31 @@
             quantity.value = 1;
         }
     }
+
+    const removeFromCart = (index) => {
+        if (isCooldown) {      
+            console.log('cooldown');
+            return;
+        }
+
+        if (cart.value.length > 0) {
+            isCooldown = true;
+            const removedItem = cart.value.splice(index, 1)[0];
+            const totalHargaSebelumDiskonPajak = cart.value.reduce((total, item) => {
+                return total + item.tt_b;
+            }, 0);
+
+            console.log('Barang dihapus:', removedItem);
+            console.log('Total harga setelah penghapusan:', totalHargaSebelumDiskonPajak);
+
+            setTimeout(() => {
+                isCooldown = false;
+                console.log('Cooldown selesai, Anda dapat menghapus barang lagi.');
+            }, 1000);
+        } else {
+            console.log('Keranjang kosong, tidak ada yang bisa dihapus.');
+        }
+    };
 
     const filteredAndSortedProducts = computed(() => {
         return Array.isArray(props.product) ? props.product.filter(barang => {
@@ -293,13 +319,21 @@
                             <div  class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
                                 <div class="text-sm text-slate-800 font-medium">{{ item.np }} x {{ item.quantity }}</div>
                                 <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
-                                <div class="flex flex-row mt-2 w-full">
-                                    <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
-                                        <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
-                                            <i class="ri-pencil-line text-current text-sm text-current"></i>
+                                <div class="flex flex-row mt-2 w-full justify-between">
+                                    <div class="flex flex-row">
+                                        <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
+                                            <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
+                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
+                                            </div>
                                         </div>
+                                        <div @click="removeFromCart(index)" class="ml-2 flex items-center justify-center bg-rose-200 w-9 h-9 rounded-full cursor-pointer">
+                                            <div class="flex items-center justify-center bg-[#FC4A4A] w-7 h-7 rounded-full text-white">
+                                                <i class="ri-delete-bin-line text-current text-sm text-current"></i>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                    <div class="ml-[45%] quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
+                                    <div class=" quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
                                         <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                             <i class="bi bi-dash text-xs"></i>
                                         </div>

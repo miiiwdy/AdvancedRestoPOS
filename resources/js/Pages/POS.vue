@@ -403,7 +403,7 @@
                                 <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
                                 <div class="flex flex-row mt-2 w-full justify-between">
                                     <div class="flex flex-row">
-                                        <div v-if="item.note.length > 1" class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
+                                        <div v-if="item.note.length > 0" class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
                                             <div @click="openCartNoteModal(item)" class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
                                                 <i class="ri-pencil-line text-current text-sm text-current"></i>
                                             </div>
@@ -418,7 +418,6 @@
                                                 <i class="ri-delete-bin-line text-current text-sm text-current"></i>
                                             </div>
                                         </div>
-
                                     </div>
                                     <div class=" quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
                                         <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">

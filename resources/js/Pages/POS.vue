@@ -23,8 +23,8 @@
     const note = ref('');
     const cart = ref([]);
     const showCart = ref(true);
-    const cartAvailable = ref(false);
     const guest = ref(0);
+    const payment = ref('Payment');
 
     const toggleCart = () => {
     showCart.value = !showCart.value;
@@ -50,6 +50,8 @@
             quantity.value--;
         }
     };
+
+    const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt, 0);
 
     const addToCart = () => {
         if (selectedProduct.value) {
@@ -310,7 +312,7 @@
                         <div class="w-full flex flex-col items-start px-3 pt-5 gap-1 pb-2 border-b-2 border-dashed">
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm text-slate-700">Subtotal</div>
-                                <div class="text-sm text-slate-700">Rp 9.000</div>
+                                <div class="text-sm text-slate-700">Rp {{formatCurrency(calculateSubtotal())}}</div>
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm text-slate-400">Tax(%)</div>
@@ -324,18 +326,22 @@
                         <div class="w-full flex-col items-start px-3 pt-1">
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-lg text-slate-800">Total</div>
-                                <div class="text-lg text-slate-800">Rp 9.000</div>
+                                <div class="text-lg text-slate-800">Rp {{formatCurrency(calculateSubtotal())}}</div>
                             </div>
                         </div>
                         <div class="flex flex-row h-auto w-full px-3 pt-2 pb-5 justify-between items-center">
-                        <div class="flex flex-row w-[48.5%] font-[500] text-[#1C8370] bg-[#f2fffc] border border-[#1C8370] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
-                            <div class="text-sm font-normal w-auto">Promo applied</div>
-                            <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#1C8370]">
+                        <div class="flex flex-row w-[48.5%] font-[500] text-gray-400 bg-[#F6F6F6] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                            <div class="text-sm font-normal w-auto">Add Promo</div>
+                            <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-slate-700 bg-white">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
                             </div>
+                            <!-- <div class="text-sm font-normal w-auto">Promo applied</div>
+                            <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#1C8370]">
+                                <i class="ri-discount-percent-line text-current text-xl"></i>
+                            </div> -->
                         </div>
                         <div class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
-                            <div class="text-sm font-normal w-auto">Payment</div>
+                            <div class="text-sm font-normal w-auto">{{ payment }}</div>
                             <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#2D71F8]">
                                 <i class="ri-bank-card-line text-current text-xl"></i>
                             </div>

@@ -59,6 +59,8 @@
         if (selectedCartProduct.value) {
             selectedCartProduct.value.note = note.value;
         }
+        isCartNoteModalOpen.value = false;
+        selectedCartProduct.value = null;
     }
 
     const closeCartNoteModal = () => {

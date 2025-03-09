@@ -32,8 +32,8 @@
     const placeholderText = "Search something sweet on your mind here...";
     const displayPlaceholder = ref("");
     var isCooldown = false;
-    let index = 0;
-    let isDeleting = false;
+    var index = 0;
+    var isDeleting = false;
 
     const toggleCart = () => {
     showCart.value = !showCart.value;
@@ -51,8 +51,13 @@
         quantity.value = 1;
     };
     const openCartNoteModal = (item) => {
-        selectedCartProduct.value = item;
-        isCartNoteModalOpen.value = true;
+        if (isCartNoteModalOpen.value && selectedCartProduct.value === item) {
+            isCartNoteModalOpen.value = false;
+            selectedCartProduct.value = null;
+        } else {
+            selectedCartProduct.value = item;
+            isCartNoteModalOpen.value = true;
+        }
     };
 
     const saveNote = () => {

@@ -23,7 +23,7 @@
     const isCartNoteModalOpen = ref(false);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
-    const quantity = ref(1)
+    const quantity = ref(1);
     var note = ref('');
     const cart = ref([]);
     const showCart = ref(true);
@@ -87,6 +87,35 @@
             quantity.value--;
         }
     };
+
+    const increaseExistQty = (item) => {
+        const cartItem = cart.value.find(cartItem => cartItem === item);
+        if (cartItem) {
+            const totalHargaBefore = cartItem.hj * quantity.value;
+            const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
+            const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
+            
+            cartItem.tt_b += totalHargaBefore;
+            cartItem.total_pajak += totalPajakPerItem;
+            cartItem.tt_a += totalHargaAfter;
+            cartItem.quantity++;
+        }
+    }
+
+    const decreaseExistQty = (item) => {
+        const cartItem = cart.value.find(cartItem => cartItem === item);
+        if (cartItem && cartItem.quantity > 1) { 
+            const totalHargaBefore = cartItem.hj * quantity.value;
+            const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
+            const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
+            
+            cartItem.tt_b -= totalHargaBefore;
+            cartItem.total_pajak -= totalPajakPerItem;
+            cartItem.tt_a -= totalHargaAfter;
+            cartItem.quantity--;
+        }
+    }
+
 
     const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
     const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
@@ -420,11 +449,11 @@
                                         </div>
                                     </div>
                                     <div class=" quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
-                                        <div @click="decreaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
+                                        <div @click="decreaseExistQty(item)" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                             <i class="bi bi-dash text-xs"></i>
                                         </div>
                                         <div class="text-sm">{{ item.quantity }}</div>
-                                        <div @click="increaseQty" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
+                                        <div @click="increaseExistQty(item)" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                             <i class="bi bi-plus-lg text-xs"></i>
                                         </div>
                                     </div>

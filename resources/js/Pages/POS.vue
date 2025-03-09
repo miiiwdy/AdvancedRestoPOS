@@ -11,6 +11,7 @@
     onMounted(() => {
         updateDateTime();
         setInterval(updateDateTime, 1000);
+        typeEffect();
     });
 
     const time = ref("");
@@ -26,7 +27,11 @@
     const showCart = ref(true);
     const guest = ref(0);
     const payment = ref('Payment');
+    const placeholderText = "Search something sweet on your mind here...";
+    const displayPlaceholder = ref("");
     var isCooldown = false;
+    let index = 0;
+    let isDeleting = false;
 
     const toggleCart = () => {
     showCart.value = !showCart.value;
@@ -41,6 +46,7 @@
         isModalOpen.value = false;
         selectedProduct.value = null;
         note.value = '';
+        quantity.value = 1;
     };
 
     const increaseQty = () => {
@@ -148,6 +154,26 @@
     return props.product.filter(product => product.kategoris_id === categoryId).length;
     };
 
+    const typeEffect = () => {
+        if (!isDeleting && index < placeholderText.length) {
+            displayPlaceholder.value += placeholderText[index];
+            index++;
+        } else if (isDeleting && index > 0) {
+            displayPlaceholder.value = displayPlaceholder.value.slice(0, -1);
+            index--;
+        }
+        
+        if (index === placeholderText.length) {
+            isDeleting = true;
+            setTimeout(typeEffect, 400);
+        } else if (index === 0) {
+            isDeleting = false;
+            setTimeout(typeEffect, 100);
+        } else {
+            setTimeout(typeEffect, isDeleting ? 50 : 100);
+        }
+    };
+
     </script>
     <style>
         * {
@@ -170,7 +196,7 @@
             <!-- kiri -->
             <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
-                    <div class="flex">
+                    <div class="flex gap-4">
                         <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
                             <i class="ri-menu-5-fill text-current text-xl"></i>
                         </div>
@@ -219,7 +245,7 @@
                 </div>
                 <!-- search -->
                 <div class="flex items-center justify-center w-[97%] h-auto px-4 pr-2 bg-white rounded-full h-16 py-2 mx-auto">
-                    <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" placeholder="Search something sweet on your mind..."/>
+                    <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" :placeholder="displayPlaceholder"/>
                         <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
                         <i class="bi bi-search text-lg text-current"></i>
                     </div>
@@ -321,7 +347,12 @@
                                 <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
                                 <div class="flex flex-row mt-2 w-full justify-between">
                                     <div class="flex flex-row">
-                                        <div class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
+                                        <div v-if="item.note.length > 1" class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
+                                            <div class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
+                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
+                                            </div>
+                                        </div>
+                                        <div v-else class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
                                             <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
                                                 <i class="ri-pencil-line text-current text-sm text-current"></i>
                                             </div>
@@ -357,6 +388,10 @@
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm text-slate-400">Tax(%)</div>
+                                <div class="text-sm text-slate-400">Rp {{ formatCurrency(calculateTotalPajak())}}</div>
+                            </div>
+                            <div class="flex flex-row w-full justify-between items-center">
+                                <div class="text-sm text-slate-400">Rounding</div>
                                 <div class="text-sm text-slate-400">Rp {{ formatCurrency(calculateTotalPajak())}}</div>
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">

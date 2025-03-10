@@ -132,19 +132,23 @@
         isPaymentModalOpen.value = true;
     };
     const confirmPayment = (selectedPayment) => {
-        paymentData.value = selectedPayment.payment_name;
-        if (!selectedPayment || !selectedPayment.payment_name || paymentData.value === 'Payment') {
-            console.warn("Payment method not selected");
+        if (!selectedPayment || !selectedPayment.payment_name) {
+            console.warn("Payment method not selected 1");
+            isPaymentModalOpen.value = false;
             return;
         }
         if (cart.value.length === 0) {
             console.warn("Cart is empty");
+            isPaymentModalOpen.value = false;
             return;
         }
-        cart.value.forEach(item => {
-            item.payment = paymentData.value;
-        });
-        isPaymentModalOpen.value = false;
+        else {
+            paymentData.value = selectedPayment.payment_name;
+            cart.value.forEach(item => {
+                item.payment = paymentData.value;
+            });
+            isPaymentModalOpen.value = false;
+        }
     };
 
     const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
@@ -200,6 +204,8 @@
                 payment: paymentData.value,
                 rounding: rounding.value,
                 total_after_rounding: totalAfterRounding.value,
+                amount_paid: amountPaid.value,
+                change: change.value,
             })
             console.log(cart);
             closeModal();

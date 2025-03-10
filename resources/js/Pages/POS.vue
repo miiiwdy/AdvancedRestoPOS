@@ -23,6 +23,8 @@
     const isModalOpen = ref(false);
     const isCartNoteModalOpen = ref(false);
     const isPaymentModalOpen = ref(false);
+    const isAmountPaidModalOpen = ref(false);
+    const isChangeModalOpen = ref(false);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -40,6 +42,7 @@
     var isCooldown = false;
     var index = 0;
     var isDeleting = false;
+    var isConfirmPayment = false;
 
     const toggleCart = () => {
         showCart.value = !showCart.value;
@@ -57,10 +60,12 @@
         quantity.value = 1;
     };
     const openCartNoteModal = (item) => {
+        if (isConfirmPayment) return;
         if (isCartNoteModalOpen.value && selectedCartProduct.value === item) {
             isCartNoteModalOpen.value = false;
             selectedCartProduct.value = null;
-        } else {
+        } 
+        else {
             selectedCartProduct.value = item;
             isCartNoteModalOpen.value = true;
         }
@@ -84,6 +89,38 @@
         note.value = newValue && newValue.note ? newValue.note : '';
     }, { deep: true });
 
+    const storeAmountPaid = () => {
+        const amountPaidNumber = Number(amountPaid.value.replace(/\D/g, ""));
+        const changeData = amountPaidNumber - totalRounding();
+        change.value = changeData;
+        
+        if (totalRounding() < amountPaidNumber) {
+            cart.value.forEach(item => {
+                item.amount_paid = amountPaidNumber;
+                item.change = changeData;
+            });
+            console.log('kembalian');
+            amountPaid.value = "";
+            isAmountPaidModalOpen.value = false;
+            isChangeModalOpen.value = true;
+        } 
+        else if (totalRounding() === amountPaidNumber) {
+            console.log('pas');
+            cart.value.forEach(item => {
+                item.amount_paid = 0;
+            });
+        } 
+        else {
+            console.warn('uangnya kurang');
+        }
+    };
+
+    const closeChangeModal = () => {
+        isChangeModalOpen.value = false;
+        change.value = 0;
+    }
+
+
     const increaseQty = () => {
         quantity.value++
     };
@@ -95,23 +132,22 @@
     };
 
     const increaseExistQty = (item) => {
+        if (isConfirmPayment) return;
         const cartItem = cart.value.find(cartItem => cartItem === item);
         if (cartItem) {
             const totalHargaBefore = cartItem.hj * quantity.value;
             const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
             const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
-            
             cartItem.tt_b += totalHargaBefore;
             cartItem.total_pajak += totalPajakPerItem;
             cartItem.tt_a += totalHargaAfter;
             cartItem.quantity++;
-
             console.log(cart);
-            
         }
     }
 
     const decreaseExistQty = (item) => {
+        if (isConfirmPayment) return;
         const cartItem = cart.value.find(cartItem => cartItem === item);
         if (cartItem && cartItem.quantity > 1) { 
             const totalHargaBefore = cartItem.hj * quantity.value;
@@ -132,6 +168,7 @@
         isPaymentModalOpen.value = true;
     };
     const confirmPayment = (selectedPayment) => {
+        isConfirmPayment = true;
         if (!selectedPayment || !selectedPayment.payment_name) {
             console.warn("Payment method not selected 1");
             isPaymentModalOpen.value = false;
@@ -148,6 +185,7 @@
                 item.payment = paymentData.value;
             });
             isPaymentModalOpen.value = false;
+            isAmountPaidModalOpen.value = true;
         }
     };
 
@@ -220,6 +258,7 @@
             console.log('cooldown');
             return;
         }
+        if (isConfirmPayment) return;
 
         if (cart.value.length > 0) {
             isCooldown = true;
@@ -258,6 +297,11 @@
     const formatCurrency = (value) => {
         if (!value) return "0";
         return Number(value).toLocaleString('id-ID');
+    };
+    const inputFormatCurrency = (event) => {
+        let value = event.target.value.replace(/\D/g, "");
+        value = Number(value).toLocaleString("id-ID");
+        amountPaid.value = value;
     };
     const updateDateTime = () => {
         const now = new Date();
@@ -449,7 +493,6 @@
                                 <textarea v-model="note" class="flex justify-start items-start mt-4 w-full h-16 bg-[#F5F5F5] text-gray-700 text-xs border-none focus:outline-none focus:ring-0 rounded-2xl p-2 text-left align-top placeholder:text-left" type="text" name="" id="" :placeholder="selectedCartProduct.note.length === 0 ? 'Add notes to your order...' : ''"></textarea>
                             </div>
                         </div>
-
                         <div class="flex justify-end mt-3">
                             <button @click="saveNote" class="bg-[#2D71F8] w-full text-white px-4 py-4 rounded-b-2xl hover:bg-[#6196ff]">Save Note</button>
                         </div>
@@ -469,6 +512,32 @@
                             <div v-for="payment in payment" :key="payment.id">
                                 <div @click="confirmPayment(payment)" class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">{{ payment.payment_name }}</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Amount Paid Modal -->
+                <div v-if="isAmountPaidModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[26rem] shadow-2xl">
+                        <div class="flex flex-row justify-center items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <h2 class="text-normal h-9 flex items-center justify-center font-normal">Amount Paid</h2>
+                        </div>
+                        <input v-model="amountPaid" @input='inputFormatCurrency' class="flex justify-center items-center text-center mt-4 w-[85%] mx-auto h-16 bg-[#F5F5F5] text-gray-700 text-md border-none focus:outline-none focus:ring-0 rounded-2xl py-2 appearance-none" type="text" name="" id="" placeholder="Input Customer Amount Paid">
+                        <div class="flex justify-center items-center mt-3">
+                            <button @click="storeAmountPaid" class="bg-[#2D71F8] w-full text-white px-4 py-4 rounded-b-2xl hover:bg-[#6196ff]">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Kembalien Modal -->
+                <div v-if="isChangeModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[26rem] shadow-2xl">
+                        <div class="flex flex-row justify-center items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <h2 class="text-normal font-normal">Change</h2>
+                        </div>
+                        <div class="flex justify-center items-center mt-4 w-[85%] mx-auto h-16 bg-[#F5F5F5] text-gray-700 text-md rounded-2xl">
+                            Rp {{ formatCurrency(change) }}
+                        </div>
+                        <div class="flex justify-center items-center mt-3">
+                            <button @click="closeChangeModal" class="bg-[#2D71F8] w-full text-white px-4 py-4 rounded-b-2xl hover:bg-[#6196ff]">Confirm</button>
                         </div>
                     </div>
                 </div>

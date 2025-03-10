@@ -31,8 +31,10 @@ class PajakResource extends Resource
                 Forms\Components\Hidden::make('outlets_id')
                     ->default(Auth::user()->outlets_id),
                 Forms\Components\TextInput::make('nama_pajak')
+                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('jumlah_pajak')
+                    ->required()    
                     ->suffix('%')
                     ->maxLength(255),
                 Forms\Components\Toggle::make('is_active'),

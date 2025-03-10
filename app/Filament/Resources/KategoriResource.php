@@ -30,14 +30,18 @@ class KategoriResource extends Resource
                 Forms\Components\Hidden::make('outlets_id')
                     ->default(Auth::user()->outlets_id),
                 Forms\Components\TextInput::make('icon')
+                    ->required()
                     ->placeholder('ambil kode icon di https://fontawesome.com/icons/')
                     ->maxLength(255),
                 Forms\Components\ColorPicker::make('warna_teks_kategori')
-                    ->placeholder('gunakan warna gelap'),
+                    ->placeholder('gunakan warna gelap')
+                    ->required(),
                 Forms\Components\ColorPicker::make('warna_background_kategori')
-                    ->placeholder('gunakan warna yang lebih terang'),
+                    ->placeholder('gunakan warna yang lebih terang')
+                    ->required(),
                 Forms\Components\TextInput::make('nama_kategori')
                     ->placeholder('masukkan nama kategori')
+                    ->required()
                     ->maxLength(255),
             ]);
     }

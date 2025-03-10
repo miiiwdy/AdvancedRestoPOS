@@ -6,6 +6,7 @@
         kategori: Array,
         namaKasir: String,
         pajak: Number,
+        payment: Array,
     })
 
     onMounted(() => {
@@ -21,6 +22,7 @@
     const searchQuery = ref('');
     const isModalOpen = ref(false);
     const isCartNoteModalOpen = ref(false);
+    const isPaymentModalOpen = ref(false);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -28,15 +30,19 @@
     const cart = ref([]);
     const showCart = ref(true);
     const guest = ref(0);
-    const payment = ref('Payment');
+    const paymentData = ref('Payment');
     const placeholderText = "Search something sweet on your mind here...";
     const displayPlaceholder = ref("");
+    const rounding = ref(0);
+    const totalAfterRounding = ref(0);
+    const amountPaid = ref(0);
+    const change = ref(0);
     var isCooldown = false;
     var index = 0;
     var isDeleting = false;
 
     const toggleCart = () => {
-    showCart.value = !showCart.value;
+        showCart.value = !showCart.value;
     };
 
     const openModal = (product) => {
@@ -99,6 +105,9 @@
             cartItem.total_pajak += totalPajakPerItem;
             cartItem.tt_a += totalHargaAfter;
             cartItem.quantity++;
+
+            console.log(cart);
+            
         }
     }
 
@@ -116,10 +125,52 @@
         }
     }
 
+    const closePaymentModal = () => {
+        isPaymentModalOpen.value = false;
+    };
+    const openPaymentModal = () => {
+        isPaymentModalOpen.value = true;
+    };
+    const confirmPayment = (selectedPayment) => {
+        paymentData.value = selectedPayment.payment_name;
+        if (!selectedPayment || !selectedPayment.payment_name || paymentData.value === 'Payment') {
+            console.warn("Payment method not selected");
+            return;
+        }
+        if (cart.value.length === 0) {
+            console.warn("Cart is empty");
+            return;
+        }
+        cart.value.forEach(item => {
+            item.payment = paymentData.value;
+        });
+        isPaymentModalOpen.value = false;
+    };
 
     const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
     const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
     const calculateTotal = () => cart.value.reduce((sum, item) => sum + item.tt_a, 0);
+    
+    const totalRounding = () => {
+        totalAfterRounding.value = calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
+        cart.value.forEach(item => {
+            item.total_after_rounding = totalAfterRounding.value;
+        });
+        return calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
+    }
+    const roundingAmount = () => {
+        const total = calculateTotal();
+        const roundedTotal = totalRounding();
+        rounding.value = roundedTotal - total;
+
+        console.log("calculateTotal:", total);
+        console.log("totalRounding:", roundedTotal);
+        cart.value.forEach(item => {
+            item.rounding = rounding.value;
+        });
+        return roundedTotal - total;
+    }
+    
     
     const addToCart = () => {
         if (selectedProduct.value) {
@@ -146,9 +197,14 @@
                 tt_a: totalHargaAfter,
                 total_pajak: totalPajakPerItem,
                 note: note.value || '',
+                payment: paymentData.value,
+                rounding: rounding.value,
+                total_after_rounding: totalAfterRounding.value,
             })
             console.log(cart);
             closeModal();
+            totalRounding();
+            roundingAmount();
             quantity.value = 1;
         }
     }
@@ -251,7 +307,7 @@
         }
     </style>
     <template>
-        <div class="flex flex-row h-screen w-full bg-[#F9F9F9]  overflow-y-hidden no-select">
+        <div class="flex flex-row h-screen w-full bg-[#F8F8F8]  overflow-y-hidden no-select">
             <!-- kiri -->
             <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
@@ -393,6 +449,23 @@
                         </div>
                     </div>
                 </div>
+                <!-- Payment Modal -->
+                <div v-if="isPaymentModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closePaymentModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[26rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                            <h2 class="text-normal font-normal">Payment</h2>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closePaymentModal">
+                                <i class="bi bi-x-lg text-current"></i>
+                            </div>
+                        </div>
+                        <div class="flex w-full flex-col px-3 max-h-96 overflow-auto mb-5">
+                            <div v-for="payment in payment" :key="payment.id">
+                                <div @click="confirmPayment(payment)" class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">{{ payment.payment_name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <transition name="slide">
                 <div v-if="showCart" class="cart flex flex-col  w-[32.6%] h-screen bg-white shadow-2xl shadow-slate-100 z-50">
@@ -471,22 +544,22 @@
                                 <div class="text-sm text-slate-700">Rp {{formatCurrency(calculateSubtotal())}}</div>
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
-                                <div class="text-sm text-slate-400">Tax(%)</div>
+                                <div class="text-sm text-slate-400">Tax ({{ props.pajak }}%)</div>
                                 <div class="text-sm text-slate-400">Rp {{ formatCurrency(calculateTotalPajak())}}</div>
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm text-slate-400">Rounding</div>
-                                <div class="text-sm text-slate-400">Rp {{ formatCurrency(calculateTotalPajak())}}</div>
+                                <div class="text-sm text-slate-400">{{ roundingAmount() }}</div>
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm font-medium text-[#1C8370]">Discount</div>
-                                <div class="text-sm font-medium text-[#1C8370]">-Rp 9.000</div>
+                                <div class="text-sm font-medium text-[#1C8370]">-Rp 0</div>
                             </div>
                         </div>
                         <div class="w-full flex-col items-start px-3 pt-1">
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-lg text-slate-800">Total</div>
-                                <div class="text-lg text-slate-800">Rp {{formatCurrency(calculateTotal())}}</div>
+                                <div class="text-lg text-slate-800">Rp {{formatCurrency(totalRounding())}}</div>
                             </div>
                         </div>
                         <div class="flex flex-row h-auto w-full px-3 pt-2 pb-5 justify-between items-center">
@@ -500,14 +573,14 @@
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
                             </div> -->
                         </div>
-                        <div class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
-                            <div class="text-sm font-normal w-auto">{{ payment }}</div>
+                        <div @click="(openPaymentModal)" class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                            <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
                             <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#2D71F8]">
                                 <i class="ri-bank-card-line text-current text-xl"></i>
                             </div>
                         </div>
                         </div>
-                        <button class="bg-[#2D71F8] w-full h-[3.7rem] text-white text-center px-4 py-4 hover:bg-[#6196ff]">Add to Cart</button>
+                        <button class="bg-[#2D71F8] w-full h-[3.7rem] text-white text-center px-4 py-4 hover:bg-[#6196ff]">Confirm Order</button>
                     </div>
                 </div>
             </transition>

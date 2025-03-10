@@ -40,9 +40,11 @@ class OutletResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('deskripsi')
                     ->placeholder('Deskripsi Outlet')
+                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('alamat')
                     ->placeholder('Alamat Outlet')
+                    ->required()
                     ->maxLength(255),
             ]);
     }

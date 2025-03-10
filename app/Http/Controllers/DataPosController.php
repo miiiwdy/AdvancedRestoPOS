@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kategori;
 use App\Models\Pajak;
+use App\Models\Payment;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,11 @@ class DataPosController extends Controller
             ['outlets_id', '=', Auth::user()->outlets_id],
             ['is_active', '=', true],
         ])->sum('jumlah_pajak');
+        $payment = Payment::where([
+            ['restos_id', '=', Auth::user()->restos_id],
+            ['outlets_id', '=', Auth::user()->outlets_id],
+            ['is_active', '=', true],
+        ])->get();
         $namaKasir = Auth::user()->name;
 
         return Inertia::render('POS', [
@@ -33,6 +39,7 @@ class DataPosController extends Controller
             'kategori' => $kategori,
             'namaKasir' => $namaKasir,
             'pajak' => $pajak,
+            'payment' => $payment,
         ]);
     }
 }

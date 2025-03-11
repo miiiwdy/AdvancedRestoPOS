@@ -20,7 +20,10 @@ class PajakResource extends Resource
 {
     protected static ?string $model = Pajak::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-scale';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-scale';
+    protected static ?string $navigationLabel = 'Data Pajak';
+    protected static ?string $navigationGroup = 'Master Data';
 
     public static function form(Form $form): Form
     {

@@ -17,8 +17,10 @@ class RestoResource extends Resource
 {
     protected static ?string $model = Resto::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-building-storefront';
+    protected static ?string $navigationLabel = 'Management Resto';
+    protected static ?string $navigationGroup = 'F&B Core';
     public static function form(Form $form): Form
     {
         return $form

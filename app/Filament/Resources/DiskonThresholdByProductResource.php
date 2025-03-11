@@ -19,7 +19,10 @@ class DiskonThresholdByProductResource extends Resource
 {
     protected static ?string $model = DiskonThresholdByProduct::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-receipt-percent';
+    protected static ?string $navigationLabel = 'Diskon Produk By Produk';
+    protected static ?string $navigationGroup = 'Discount';
 
     public static function form(Form $form): Form
     {

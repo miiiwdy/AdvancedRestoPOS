@@ -18,8 +18,10 @@ class MejaResource extends Resource
 {
     protected static ?string $model = Meja::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-rectangle-group';
+    protected static ?string $navigationLabel = 'Data Meja';
+    protected static ?string $navigationGroup = 'Master Data';
     public static function form(Form $form): Form
     {
         return $form

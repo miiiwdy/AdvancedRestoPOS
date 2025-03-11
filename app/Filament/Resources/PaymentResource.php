@@ -18,8 +18,10 @@ class PaymentResource extends Resource
 {
     protected static ?string $model = Payment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-credit-card';
+    protected static ?string $navigationLabel = 'Data Payment';
+    protected static ?string $navigationGroup = 'Master Data';
     public static function form(Form $form): Form
     {
         return $form

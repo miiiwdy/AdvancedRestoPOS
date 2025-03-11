@@ -24,6 +24,7 @@
     const isCartNoteModalOpen = ref(false);
     const isPaymentModalOpen = ref(false);
     const isAmountPaidModalOpen = ref(false);
+    const isGuestEditModalOpen = ref(false);
     const isChangeModalOpen = ref(false);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
@@ -32,6 +33,7 @@
     const cart = ref([]);
     const showCart = ref(true);
     const orderNumber = ref('');
+    const orderType = ref('Dine In')
     const guest = ref(0);
     const paymentData = ref('Payment');
     const placeholderText = "Search something sweet on your mind here...";
@@ -48,7 +50,16 @@
     const toggleCart = () => {
         showCart.value = !showCart.value;
     };
+    const toggleGuest = () => {
+        !isGuestEditModalOpen.value ? isGuestEditModalOpen.value = true : isGuestEditModalOpen.value = false;
+    }
 
+    const storeGuest = () => {
+        cart.value.forEach(item => {
+                item.guest = guest.value;
+            });
+        toggleGuest();
+    }
     const openModal = (product) => {
         selectedProduct.value = product;
         isModalOpen.value = true;
@@ -214,7 +225,7 @@
         return roundedTotal - total;
     }
     
-    function generateRandomString() {
+    function createOrderNumber() {
         if (!orderNumber.value) {
             const hurup = Math.random().toString(36).replace(/[^a-z]/g, '').substring(0, 3).toUpperCase();
             const angka = Math.floor(Math.random() * 900) + 100;
@@ -227,6 +238,9 @@
         }
     }
 
+    const getOrderType = () => {
+        orderType.value = orderType.value === 'Dine In' ? 'Take Away' : 'Dine In';
+    }
 
     const addToCart = () => {
         if (selectedProduct.value) {
@@ -258,7 +272,8 @@
                 total_after_rounding: totalAfterRounding.value,
                 amount_paid: amountPaid.value,
                 change: change.value,
-                orderNumber: generateRandomString(),
+                orderNumber: createOrderNumber(),
+                guest: guest.value || '',
             })
             console.log(cart);
             console.log(cart.value.length);
@@ -592,6 +607,19 @@
                         </div>
                     </div>
                 </div>
+                <!-- guest edit modal -->
+                <div v-if="isGuestEditModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self(isGuestEditModalOpen)>
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[26rem] shadow-2xl">
+                        <div class="flex flex-row justify-center items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <h2 class="text-normal h-9 flex items-center justify-center font-normal">Edit Guest</h2>
+                        </div>
+                        <input v-if="guest.length > 0" v-model="guest"class="flex justify-center items-center text-center mt-4 w-[85%] mx-auto h-16 bg-[#F5F5F5] text-gray-700 text-md border-none focus:outline-none focus:ring-0 rounded-2xl py-2 appearance-none" type="text" name="" id="" placeholder="JANCUK">
+                        <input v-else @input="guest = $event.target.value"  class="flex justify-center items-center text-center mt-4 w-[85%] mx-auto h-16 bg-[#F5F5F5] text-gray-700 text-md border-none focus:outline-none focus:ring-0 rounded-2xl py-2 appearance-none" type="text" name="" id="" placeholder="Input Guest Count">
+                        <div class="flex justify-center items-center mt-3">
+                            <button @click="storeGuest" class="bg-[#2D71F8] w-full text-white px-4 py-4 rounded-b-2xl hover:bg-[#6196ff]">Confirm</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <transition name="slide">
                 <div v-if="showCart" class="cart flex flex-col  w-[32.6%] h-screen bg-white shadow-2xl shadow-slate-100 z-50">
@@ -603,7 +631,7 @@
                             <div class="text-lg font-semibold text-slate-700">{{ guest }} Guest</div>
                             <div class="text-sm text-gray-400"> Order Number: {{ cart.length > 0 ? orderNumber : ''}}</div>
                         </div>
-                        <div @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-gray-100 text-slate-700 cursor-pointer">
+                        <div @click="toggleGuest" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-gray-100 text-slate-700 cursor-pointer">
                             <i class="ri-pencil-line text-current text-xl"></i>
                         </div>
                     </div>
@@ -614,10 +642,10 @@
                                 <i class="ri-arrow-down-s-fill"></i>
                             </div>
                         </div>
-                        <div class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
-                            <div class="text-sm w-auto">Dine In</div>
+                        <div @click=(getOrderType) class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
+                            <div class="text-sm w-auto">{{ orderType }}</div>
                             <div class="icons flex items-center justify-center w-5 h-5 rounded-full bg-white">
-                                <i class="ri-arrow-down-s-fill"></i>
+                                <i class="ri-loop-right-fill"></i>
                             </div>
                         </div>
                     </div>

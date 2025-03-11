@@ -31,6 +31,7 @@
     var note = ref('');
     const cart = ref([]);
     const showCart = ref(true);
+    const orderNumber = ref('');
     const guest = ref(0);
     const paymentData = ref('Payment');
     const placeholderText = "Search something sweet on your mind here...";
@@ -213,7 +214,20 @@
         return roundedTotal - total;
     }
     
-    
+    function generateRandomString() {
+        if (!orderNumber.value) {
+            const hurup = Math.random().toString(36).replace(/[^a-z]/g, '').substring(0, 3).toUpperCase();
+            const angka = Math.floor(Math.random() * 900) + 100;
+            const ON = hurup + angka;
+            orderNumber.value = ON;
+            return ON
+        }
+        else {
+            return orderNumber.value;
+        }
+    }
+
+
     const addToCart = () => {
         if (selectedProduct.value) {
             const totalHargaPerItem = selectedProduct.value.harga_product;
@@ -244,12 +258,22 @@
                 total_after_rounding: totalAfterRounding.value,
                 amount_paid: amountPaid.value,
                 change: change.value,
+                orderNumber: generateRandomString(),
             })
             console.log(cart);
-            closeModal();
-            totalRounding();
-            roundingAmount();
-            quantity.value = 1;
+            console.log(cart.value.length);
+            isModalOpen.value = false;
+        }
+    }
+
+    const confirmOrder = () => {
+        if (paymentData.value === "Payment" || !paymentData.value) {
+            console.log('adawd');
+            return;
+        }
+        if (cart.value.length === 0) {
+            console.log('Keranjang kosong. Silakan tambahkan produk.');
+            return;
         }
     }
 
@@ -260,6 +284,10 @@
         }
         if (isConfirmPayment) return;
 
+        //kayanya ga perlu
+        // if (cart.value.length === 1) {
+        //     orderNumber.value === ''
+        // }
         if (cart.value.length > 0) {
             isCooldown = true;
             const removedItem = cart.value.splice(index, 1)[0];
@@ -364,7 +392,7 @@
         }
     </style>
     <template>
-        <div class="flex flex-row h-screen w-full bg-[#F8F8F8]  overflow-y-hidden no-select">
+        <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select">
             <!-- kiri -->
             <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
@@ -372,8 +400,18 @@
                         <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
                             <i class="ri-menu-5-fill text-current text-xl"></i>
                         </div>
-                        <div class="flex w-52 h-[3.2rem] rounded-full items-center bg-white">
-                            p
+                        <div class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white">
+                            <div class="w-9 h-9 rounded-full mx-2 flex items-center justify-center bg-[#f0f7ff]">
+                                <img class="h-6 w-auto" src="../Assets/profileimg.png" alt="">
+                            </div>
+                            <div class="flex flex-col justify-center mb-1">
+                                <div class="font-medium text-gray-700">
+                                    {{ props.namaKasir }}
+                                </div>
+                                <div class="text-xs font-normal text-gray-400">
+                                    Cashier
+                                </div>
+                            </div>
                         </div>
                         <div class="tanggal w-60 h-[3.2rem] rounded-full items-center bg-white flex">
                             <div class="wrap px-2 flex flex-row items-center">
@@ -381,7 +419,7 @@
                                 class="icon w-9 h-9 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
                                 <i class="ri-calendar-line text-current text-lg"></i>
                             </div>
-                            <p class="text-gray-700 font-semibold ml-3">{{ date }}</p>
+                            <p class="text-gray-700 font-medium ml-3">{{ date }}</p>
                         </div>
                         </div>
                         <div class="jam w-36 h-[3.2rem] rounded-full items-center bg-white flex">
@@ -563,7 +601,7 @@
                         </div>
                         <div class="flex flex-col text-center items-center">
                             <div class="text-lg font-semibold text-slate-700">{{ guest }} Guest</div>
-                            <div class="text-sm text-gray-400"> Order Number: </div>
+                            <div class="text-sm text-gray-400"> Order Number: {{ cart.length > 0 ? orderNumber : ''}}</div>
                         </div>
                         <div @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-gray-100 text-slate-700 cursor-pointer">
                             <i class="ri-pencil-line text-current text-xl"></i>
@@ -675,7 +713,7 @@
                             </div>
                         </div>
                         </div>
-                        <button class="bg-[#2D71F8] w-full h-[3.7rem] text-white text-center px-4 py-4 hover:bg-[#6196ff]">Confirm Order</button>
+                        <button @click="(confirmOrder)" class="bg-[#2D71F8] w-full h-[3.7rem] text-white text-center px-4 py-4 hover:bg-[#6196ff]">Confirm Order</button>
                     </div>
                 </div>
             </transition>

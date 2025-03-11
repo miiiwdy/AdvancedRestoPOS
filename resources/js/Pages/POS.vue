@@ -1,6 +1,6 @@
     <script setup>
-    import { ref, onMounted, computed, watch } from "vue";
-
+    import { ref, onMounted, computed, watch, watchEffect } from "vue";
+    
     const props = defineProps({
         product: Array,
         kategori: Array,
@@ -267,12 +267,12 @@
                 return total + item.tt_b;
             }, 0);
 
-            console.log('Barang dihapus:', removedItem);
+            console.log('product dihapus:', removedItem);
             console.log('Total harga setelah penghapusan:', totalHargaSebelumDiskonPajak);
 
             setTimeout(() => {
                 isCooldown = false;
-                console.log('Cooldown selesai, Anda dapat menghapus barang lagi.');
+                console.log('Cooldown selesai, Anda dapat menghapus product lagi.');
             }, 1000);
         } else {
             console.log('Keranjang kosong, tidak ada yang bisa dihapus.');
@@ -280,15 +280,22 @@
     };
 
     const filteredAndSortedProducts = computed(() => {
-        return Array.isArray(props.product) ? props.product.filter(barang => {
-            const query = searchQuery.value.toLowerCase();
-            const matchesSearch = barang.nama_product.toLowerCase().includes(query);
+        if (!Array.isArray(props.product)) return [];
+
+        const query = searchQuery.value.toLowerCase();
+        const filtered = props.product.filter(product => {
+            const matchesSearch = product.nama_product.toLowerCase().includes(query);
             if (activeMenu.value === 1337) {
                 return matchesSearch;
             }
-            const matchesCategory = activeMenu.value ? barang.kategoris_id === activeMenu.value : true;
+            const matchesCategory = activeMenu.value ? product.kategoris_id === activeMenu.value : true;
             return matchesSearch && matchesCategory;
-        }) : [];
+        });
+        return filtered;
+    });
+
+    const isProductAvailable = computed(() => {
+        return searchQuery.value === '' || filteredAndSortedProducts.value.length > 0;
     });
 
     const toggleActive = (categoryId) => {
@@ -365,7 +372,10 @@
                         <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
                             <i class="ri-menu-5-fill text-current text-xl"></i>
                         </div>
-                        <div class="tanggal w-56 h-[3.2rem] rounded-full items-center bg-white flex">
+                        <div class="flex w-52 h-[3.2rem] rounded-full items-center bg-white">
+                            p
+                        </div>
+                        <div class="tanggal w-60 h-[3.2rem] rounded-full items-center bg-white flex">
                             <div class="wrap px-2 flex flex-row items-center">
                                 <div
                                 class="icon w-9 h-9 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
@@ -395,7 +405,7 @@
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
                             <div class="nama_kategori font-semibold text-lg text-gray-700">All Menu</div>
-                            <div class="total_barang_in_kategori text-sm text-gray-500">{{ props.product.length }} items</div>
+                            <div class="total_product_in_kategori text-sm text-gray-500">{{ props.product.length }} items</div>
                         </div>
                     </div>  
                     <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
@@ -404,7 +414,7 @@
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
                             <div class="nama_kategori font-semibold text-lg text-gray-700">{{ kategori.nama_kategori}}</div>
-                            <div class="total_barang_in_kategori text-sm text-gray-500">{{ getProductCount(kategori.id) }} items</div>
+                            <div class="total_product_in_kategori text-sm text-gray-500">{{ getProductCount(kategori.id) }} items</div>
                         </div>
                     </div>
                 </div>
@@ -431,6 +441,9 @@
                                 Rp{{ formatCurrency(product.harga_product) }}
                             </div>
                         </div>
+                    </div>
+                    <div v-if="!isProductAvailable" class="flex w-full h-64 rounded-xl overflow-hidden justify-center">
+                        <h2 class="text-xl text-gray-400">No Product Available</h2>
                     </div>
                 </div>
                 <!-- Modal -->
@@ -570,7 +583,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="h-[50%] overflow-auto">
+                    <div class="h-full overflow-auto">
                         <div v-if="cart.length > 0" v-for="(item, index) in cart" :key="index" class="flex flex-row w-full h-28 px-3 border-dashed" :class="{ 'border-t-2': index !== 0 }">
                             <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
                                 <img class="max-h-12 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + item.foto_product">
@@ -612,7 +625,8 @@
                             <div class="text-sm text-gray-400">No Item Selected</div>
                         </div>
                     </div>
-                    <div class="w-full h-[40%] rounded-t-3xl shadow-[0px_-10px_20px_rgba(0,0,0,0.1)] shadow-slate-100">
+                    
+                    <div class="w-full h-auto rounded-t-3xl shadow-[0px_-10px_20px_rgba(0,0,0,0.1)] shadow-slate-100">
                         <div class="w-full flex flex-col items-start px-3 pt-5 gap-1 pb-2 border-b-2 border-dashed">
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm text-slate-700">Subtotal</div>
@@ -631,26 +645,32 @@
                                 <div class="text-sm font-medium text-[#1C8370]">-Rp 0</div>
                             </div>
                         </div>
-                        <div class="w-full flex-col items-start px-3 pt-1">
+                        <div class="w-full flex-col items-start px-3 pb-2 pt-1 shadow-sm shadow-gray-100">
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-lg text-slate-800">Total</div>
                                 <div class="text-lg text-slate-800">Rp {{formatCurrency(totalRounding())}}</div>
                             </div>
                         </div>
-                        <div class="flex flex-row h-auto w-full px-3 pt-2 pb-5 justify-between items-center">
+                        <div class="flex flex-row h-auto w-full px-3 pt-3 pb-3 justify-between items-center">
                         <div class="flex flex-row w-[48.5%] font-[500] text-gray-400 bg-[#F6F6F6] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">Add Promo</div>
-                            <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-slate-700 bg-white">
+                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-white">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
                             </div>
                             <!-- <div class="text-sm font-normal w-auto">Promo applied</div>
-                            <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#1C8370]">
+                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#1C8370]">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
                             </div> -->
                         </div>
-                        <div @click="(openPaymentModal)" class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                        <div @click="(openPaymentModal)" v-if="!isAmountPaidModalOpen" class="flex flex-row w-[48.5%] font-[500] text-black bg-white border border-slate-700 cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
-                            <div class="icons flex items-center justify-center w-9 h-9 rounded-full text-white bg-[#2D71F8]">
+                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-[#F6F6F6]">
+                                <i class="ri-bank-card-line text-current text-xl"></i>
+                            </div>
+                        </div>
+                        <div v-if="isAmountPaidModalOpen" class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                            <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
+                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#2D71F8]">
                                 <i class="ri-bank-card-line text-current text-xl"></i>
                             </div>
                         </div>

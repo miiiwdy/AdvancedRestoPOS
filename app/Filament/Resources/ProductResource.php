@@ -42,6 +42,9 @@ class ProductResource extends Resource
                             ->pluck('nama_kategori', 'id');
                     })
                     ->searchable(),
+                Forms\Components\TextInput::make('kode_product')
+                    ->required()
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('nama_product')
                     ->required()
                     ->maxLength(255),
@@ -63,6 +66,10 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('kode_product')
+                    ->badge()
+                ->color('info')
+                ->searchable(),
                 Tables\Columns\ImageColumn::make('foto_product'),
                 Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()
@@ -74,7 +81,7 @@ class ProductResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('kategori.nama_kategori')
                     ->badge()
-                    ->color('success')
+                    ->color('info')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('nama_product')
                     ->searchable(),
@@ -87,6 +94,7 @@ class ProductResource extends Resource
                     ->sortable(),
                     Tables\Columns\TextColumn::make('harga_product')
                     ->numeric()
+                    ->label('Harga jual product')
                     ->suffix(' IDR')
                     ->badge()
                     ->sortable(),

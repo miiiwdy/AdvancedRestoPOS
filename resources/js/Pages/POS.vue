@@ -1,5 +1,5 @@
     <script setup>
-    import { ref, onMounted, computed, watch, watchEffect } from "vue";
+    import { ref, onMounted, computed, watch } from "vue";
     
     const props = defineProps({
         product: Array,
@@ -7,6 +7,8 @@
         namaKasir: String,
         pajak: Number,
         payment: Array,
+        diskonThresholdByOrder: Object,
+        diskonThresholdByProduct: Object,
     })
 
     onMounted(() => {
@@ -14,6 +16,18 @@
         setInterval(updateDateTime, 1000);
         typeEffect();
     });
+
+    const getDiskonThresholdByProductData = computed(() => 
+        props.product.find(p => p.id === props.diskonThresholdByProduct.target_product_id) || null
+    );
+
+    const DTBP_kode_product = computed(() => getDiskonThresholdByProductData.value?.kode_product || "Tidak Ditemukan");
+    const DTBP_nama_product = computed(() => getDiskonThresholdByProductData.value?.nama_product || "Tidak Ditemukan");
+    const DTBP_deskripsi_product = computed(() => getDiskonThresholdByProductData.value?.deskripsi_product || "Tidak Ditemukan");
+    const DTBP_foto_product = computed(() => getDiskonThresholdByProductData.value?.foto_product || "Tidak Ditemukan");
+    const DTBP_kategori = computed(() => getDiskonThresholdByProductData.value?.kategoris_id || "Tidak Ditemukan");
+    const DTBP_harga_product = computed(() => getDiskonThresholdByProductData.value?.harga_product || "Tidak Ditemukan");
+    const DTBP_harga_beli_product = computed(() => getDiskonThresholdByProductData.value?.harga_beli_product || "Tidak Ditemukan");
 
     const time = ref("");
     const period = ref("");
@@ -32,7 +46,7 @@
     var note = ref('');
     const cart = ref([]);
     const showCart = ref(true);
-    const orderNumber = ref('');
+    const orderID = ref('');
     const orderType = ref('Dine In')
     const guest = ref(0);
     const paymentData = ref('Payment');
@@ -46,6 +60,7 @@
     var index = 0;
     var isDeleting = false;
     var isConfirmPayment = false;
+
 
     const toggleCart = () => {
         showCart.value = !showCart.value;
@@ -145,33 +160,92 @@
 
     const increaseExistQty = (item) => {
         if (isConfirmPayment) return;
-        const cartItem = cart.value.find(cartItem => cartItem === item);
+        const cartItem = cart.value.find(cartItem => cartItem.id === item.id); 
         if (cartItem) {
-            const totalHargaBefore = cartItem.hj * quantity.value;
-            const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
-            const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
-            cartItem.tt_b += totalHargaBefore;
-            cartItem.total_pajak += totalPajakPerItem;
-            cartItem.tt_a += totalHargaAfter;
             cartItem.quantity++;
+            cartItem.tt_b = cartItem.hj * cartItem.quantity;
+            cartItem.total_pajak = cartItem.tt_b * (props.pajak / 100);
+            cartItem.tt_a = cartItem.tt_b + cartItem.total_pajak;
             console.log(cart);
+            if (cartItem.id_product === props.diskonThresholdByProduct.product_id &&  cartItem.quantity === props.diskonThresholdByProduct.minimum_items_count) {
+                const isBonusExist = cart.value.some(c => c.note === props.diskonThresholdByProduct.nama_diskon);
+                if (!isBonusExist) {
+                    cart.value.push({
+                        np: DTBP_nama_product.value,
+                        kode_product: DTBP_kode_product.value,
+                        deskripsi_product: DTBP_deskripsi_product.value,
+                        foto_product: DTBP_foto_product.value,
+                        kategori: DTBP_kategori.value,
+                        quantity: props.diskonThresholdByProduct.target_product_quantity,
+                        hb: 0,
+                        thb: 0,
+                        hj: 0,
+                        tt_b: 0,
+                        tt_a: 0,
+                        total_pajak: 0,
+                        note: props.diskonThresholdByProduct.nama_diskon,
+                        payment: paymentData.value,
+                        rounding: rounding.value,
+                        total_after_rounding: totalAfterRounding.value,
+                        amount_paid: amountPaid.value,
+                        change: change.value,
+                        orderID: createorderID(),
+                        guest: guest.value || '',
+                        orderType: orderType.value,
+                        id_product: cartItem.id,
+                    });
+                    console.log('Nambah cuy');
+                } else {
+                    console.log('alr bro');
+                }
+            }
         }
-    }
+    };
+
 
     const decreaseExistQty = (item) => {
         if (isConfirmPayment) return;
         const cartItem = cart.value.find(cartItem => cartItem === item);
         if (cartItem && cartItem.quantity > 1) { 
-            const totalHargaBefore = cartItem.hj * quantity.value;
-            const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
-            const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
-            
-            cartItem.tt_b -= totalHargaBefore;
-            cartItem.total_pajak -= totalPajakPerItem;
-            cartItem.tt_a -= totalHargaAfter;
             cartItem.quantity--;
-        }
-    }
+            cartItem.tt_b = cartItem.hj * cartItem.quantity;
+            cartItem.total_pajak = cartItem.tt_b * (props.pajak / 100);
+            cartItem.tt_a = cartItem.tt_b + cartItem.total_pajak;
+            if (cartItem.id_product === props.diskonThresholdByProduct.product_id &&  cartItem.quantity < props.diskonThresholdByProduct.minimum_items_count) {
+                const isBonusExist = cart.value.some(c => c.note === props.diskonThresholdByProduct.nama_diskon);
+                if (!isBonusExist) {
+                    cart.value.push({
+                        np: DTBP_nama_product.value,
+                        kode_product: DTBP_kode_product.value,
+                        deskripsi_product: DTBP_deskripsi_product.value,
+                        foto_product: DTBP_foto_product.value,
+                        kategori: DTBP_kategori.value,
+                        quantity: props.diskonThresholdByProduct.target_product_quantity,
+                        hb: 0,
+                        thb: 0,
+                        hj: 0,
+                        tt_b: 0,
+                        tt_a: 0,
+                        total_pajak: 0,
+                        note: props.diskonThresholdByProduct.nama_diskon,
+                        payment: paymentData.value,
+                        rounding: rounding.value,
+                        total_after_rounding: totalAfterRounding.value,
+                        amount_paid: amountPaid.value,
+                        change: change.value,
+                        orderID: createorderID(),
+                        guest: guest.value || '',
+                        orderType: orderType.value,
+                        id_product: cartItem.id,
+                    });
+                    console.log('🎉 Nambah barang diskon! Diskon terpakai!');
+                } else {
+                    console.log('⚠️ Bonus sudah ada di cart, tidak ditambahkan lagi.');
+                }
+            }
+        }    
+    };
+
 
     const closePaymentModal = () => {
         isPaymentModalOpen.value = false;
@@ -187,7 +261,7 @@
             return;
         }
         if (cart.value.length === 0) {
-            console.warn("Cart is empty");
+            console.warn("cart lo kosong");
             isPaymentModalOpen.value = false;
             return;
         }
@@ -225,16 +299,16 @@
         return roundedTotal - total;
     }
     
-    function createOrderNumber() {
-        if (!orderNumber.value) {
+    function createorderID() {
+        if (!orderID.value) {
             const hurup = Math.random().toString(36).replace(/[^a-z]/g, '').substring(0, 3).toUpperCase();
             const angka = Math.floor(Math.random() * 900) + 100;
             const ON = hurup + angka;
-            orderNumber.value = ON;
+            orderID.value = ON;
             return ON
         }
         else {
-            return orderNumber.value;
+            return orderID.value;
         }
     }
 
@@ -244,8 +318,10 @@
 
     const addToCart = () => {
         if (selectedProduct.value) {
+            const totalHargaBeliPerItem = selectedProduct.value.harga_beli_product;
+            const totalHargaBeli = totalHargaBeliPerItem * quantity.value;
             const totalHargaPerItem = selectedProduct.value.harga_product;
-            const totalHargaBefore = selectedProduct.value.harga_product * quantity.value;
+            const totalHargaBefore = totalHargaPerItem * quantity.value;
             const existingProductIndex = cart.value.findIndex(item => item.kode_product === selectedProduct.value.kode_product);
             const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
             const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
@@ -254,6 +330,40 @@
                 alert('produk sudah ada di keranjang')
                 return;
             }
+
+            if (selectedProduct.value.id === props.diskonThresholdByProduct.product_id && quantity.value >= props.diskonThresholdByProduct.minimum_items_count) {
+                // const totalHargaBeliDTBP = DTBP_harga_beli_product.value * props.diskonThresholdByProduct.target_product_quantity;
+                // const totalHargaJualDTBP = DTBP_harga_product.value * props.diskonThresholdByProduct.target_product_quantity;
+                // const totalPajakDTBP = totalHargaJualDTBP * (props.pajak / 100);
+                // const totalHargaAfterDTBP = totalHargaJualDTBP + totalPajakDTBP;
+                cart.value.push({
+                    np: DTBP_nama_product.value,
+                    kode_product: DTBP_kode_product.value,
+                    deskripsi_product: DTBP_deskripsi_product.value,
+                    foto_product: DTBP_foto_product.value,
+                    kategori: DTBP_kategori.value,
+                    quantity: props.diskonThresholdByProduct.target_product_quantity,
+                    hb: 0,
+                    thb: 0,
+                    hj: 0,
+                    tt_b: 0,
+                    tt_a: 0,
+                    total_pajak: 0,
+                    note: props.diskonThresholdByProduct.nama_diskon,
+                    payment: paymentData.value,
+                    rounding: rounding.value,
+                    total_after_rounding: totalAfterRounding.value,
+                    amount_paid: amountPaid.value,
+                    change: change.value,
+                    orderID: createorderID(),
+                    guest: guest.value || '',
+                    orderType: orderType.value,
+                    id_product: selectedProduct.value.id,
+                })
+                console.log('Nambah barang baru cuy, Diskon terpakai!');
+                
+            }
+
             cart.value.push({
                 np: selectedProduct.value.nama_product,
                 kode_product: selectedProduct.value.kode_product,
@@ -262,6 +372,7 @@
                 kategori: selectedProduct.value.kategoris_id,
                 quantity: quantity.value,
                 hb: selectedProduct.value.harga_beli_product,
+                thb: totalHargaBeli,
                 hj: totalHargaPerItem,
                 tt_b: totalHargaBefore,
                 tt_a: totalHargaAfter,
@@ -272,8 +383,10 @@
                 total_after_rounding: totalAfterRounding.value,
                 amount_paid: amountPaid.value,
                 change: change.value,
-                orderNumber: createOrderNumber(),
+                orderID: createorderID(),
                 guest: guest.value || '',
+                orderType: orderType.value,
+                id_product: selectedProduct.value.id,
             })
             console.log(cart);
             console.log(cart.value.length);
@@ -301,7 +414,7 @@
 
         //kayanya ga perlu
         // if (cart.value.length === 1) {
-        //     orderNumber.value === ''
+        //     orderID.value === ''
         // }
         if (cart.value.length > 0) {
             isCooldown = true;
@@ -511,7 +624,7 @@
                         </div>
                         <div v-if="selectedProduct">
                             <div class="mt-3 img rounded-2xl w-[95%] m-auto h-44 bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + selectedProduct.foto_product" alt="{{ selectedProduct.kode_product }} {{ selectedProduct.deskripsi_product }}">
+                                <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + selectedProduct.foto_product" alt="{{ selectedProduct.kode_product }} {{ selectedProduct.deskripsi_product }} {{ selectedProduct.id }} {{ selectedProduct.harga_beli_product }}">
                             </div>
                             <div class="flex flex-col mt-1 p-3">
                                 <div class="kategori flex items-center justify-center px-2 py-0.5 rounded-xl w-fit text-xs font-semibold" :style="{ backgroundColor: selectedProduct.kategori?.warna_background_kategori, color: selectedProduct.kategori?.warna_teks_kategori}"> {{selectedProduct.kategori?.nama_kategori}}
@@ -629,7 +742,7 @@
                         </div>
                         <div class="flex flex-col text-center items-center">
                             <div class="text-lg font-semibold text-slate-700">{{ guest }} Guest</div>
-                            <div class="text-sm text-gray-400"> Order Number: {{ cart.length > 0 ? orderNumber : ''}}</div>
+                            <div class="text-sm text-gray-400"> Order ID: {{ cart.length > 0 ? orderID : ''}}</div>
                         </div>
                         <div @click="toggleGuest" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-gray-100 text-slate-700 cursor-pointer">
                             <i class="ri-pencil-line text-current text-xl"></i>
@@ -656,26 +769,38 @@
                             </div>
                             <div  class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
                                 <div class="text-sm text-slate-800 font-medium">{{ item.np }} x {{ item.quantity }}</div>
-                                <div class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
+                                <div v-if="item.note === props.diskonThresholdByProduct.nama_diskon" class="text-sm text-[#1C8370] font-medium">{{ props.diskonThresholdByProduct.nama_diskon }}</div>
+                                <div v-else class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
+                                
                                 <div class="flex flex-row mt-2 w-full justify-between">
                                     <div class="flex flex-row">
-                                        <div v-if="item.note.length > 0" class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
+                                        <div v-if="item.note === props.diskonThresholdByProduct.nama_diskon" class="flex items-center justify-center bg-[#d4ffea] w-9 h-9 rounded-full cursor-pointer">
+                                            <div @click="openCartNoteModal(item)" class="flex items-center justify-center bg-[#1C8370] w-7 h-7 rounded-full text-white">
+                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
+                                            </div>
+                                        </div>
+                                        <div v-if="item.note.length > 0 && item.note !== props.diskonThresholdByProduct.nama_diskon"class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
                                             <div @click="openCartNoteModal(item)" class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
                                                 <i class="ri-pencil-line text-current text-sm text-current"></i>
                                             </div>
                                         </div>
-                                        <div v-else @click="openCartNoteModal(item)" class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
+
+                                        <div v-else-if="item.note !== props.diskonThresholdByProduct.nama_diskon" @click="openCartNoteModal(item)" class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
                                             <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
                                                 <i class="ri-pencil-line text-current text-sm text-current"></i>
                                             </div>
                                         </div>
-                                        <div @click="removeFromCart(index)" class="ml-2 flex items-center justify-center bg-rose-200 w-9 h-9 rounded-full cursor-pointer">
+                                        <div v-if="item.note !== props.diskonThresholdByProduct.nama_diskon" @click="removeFromCart(index)" class="ml-2 flex items-center justify-center bg-rose-200 w-9 h-9 rounded-full cursor-pointer">
                                             <div class="flex items-center justify-center bg-[#FC4A4A] w-7 h-7 rounded-full text-white">
                                                 <i class="ri-delete-bin-line text-current text-sm text-current"></i>
                                             </div>
                                         </div>
+                                        <div v-if="item.note === props.diskonThresholdByProduct.nama_diskon" class="ml-2 quantity w-9 h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-center items-center px-1">
+                                            <div class="text-sm flex items-center justify-center bg-white w-7 h-7 rounded-full">{{ item.quantity }}</div>
+                                        </div>
                                     </div>
-                                    <div class=" quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
+                                    
+                                    <div v-if="item.note !== props.diskonThresholdByProduct.nama_diskon" class=" quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
                                         <div @click="decreaseExistQty(item)" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                             <i class="bi bi-dash text-xs"></i>
                                         </div>

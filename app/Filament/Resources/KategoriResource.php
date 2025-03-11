@@ -31,7 +31,7 @@ class KategoriResource extends Resource
                     ->default(Auth::user()->outlets_id),
                 Forms\Components\TextInput::make('icon')
                     ->required()
-                    ->placeholder('ambil kode icon di https://fontawesome.com/icons/')
+                    ->placeholder('ambil kode icon di https://remixicon.com/')
                     ->maxLength(255),
                 Forms\Components\ColorPicker::make('warna_teks_kategori')
                     ->placeholder('gunakan warna gelap')

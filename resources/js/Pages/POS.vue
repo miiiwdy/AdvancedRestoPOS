@@ -30,6 +30,11 @@
         ];
     });
 
+    const isAnyDiscountApplied = computed(() => {
+        return allActiveDiscounts.value.some(diskon => 
+            cart.value.some(item => item.note === diskon.nama_diskon)
+        );
+    });
 
 
     const usedDiscounts = computed(() => {
@@ -958,18 +963,15 @@
                             </div>
                         </div>
                         <div class="flex flex-row h-auto w-full px-3 pt-3 pb-3 justify-between items-center">
-                        <div @click="(openCheckDiscountModal)" class="flex flex-row w-[48.5%] font-[500] text-gray-400 bg-[#F6F6F6] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
-                            <div class="text-sm font-normal w-auto">Check Discount</div>
-                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-white">
+                            <div @click="openCheckDiscountModal" class="flex flex-row w-[48.5%] font-[500] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1" :class="isAnyDiscountApplied ? 'text-[#1C8370] border border-[#1C8370] bg-[#f7fffc]' : 'text-gray-400 bg-[#F6F6F6]'">
+                            <div class="text-sm font-normal w-auto pr-1">
+                                {{ isAnyDiscountApplied ? 'Discount applied' : 'Check Discount' }}
+                            </div>
+                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full" :class="isAnyDiscountApplied ? 'text-white bg-[#1C8370]' : 'text-slate-700 bg-white'">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
                             </div>
                         </div>
-                        <!-- <div class="flex flex-row w-[48.5%] font-[500] text-[#1C8370] border border-[#1C8370] bg-[#f7fffc] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
-                            <div class="text-sm font-normal w-auto pr-1">Discount applied</div>
-                            <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#1C8370]">
-                                <i class="ri-discount-percent-line text-current text-xl"></i>
-                            </div>
-                        </div> -->
+
                         <div @click="(openPaymentModal)" v-if="!isAmountPaidModalOpen" class="flex flex-row w-[48.5%] font-[500] text-black bg-white border border-slate-700 cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-[#F6F6F6]">

@@ -43,7 +43,7 @@ class DataPosController extends Controller
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
             ['is_active', '=', true],
-        ])->first();
+        ])->get();
         $namaKasir = Auth::user()->name;
 
         return Inertia::render('POS', [

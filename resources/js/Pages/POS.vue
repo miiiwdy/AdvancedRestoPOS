@@ -9,6 +9,7 @@
         payment: Array,
         diskonThresholdByOrder: Array,
         diskonThresholdByProduct: Array,
+        kategoriDiskons: Array,
     })
 
     onMounted(() => {
@@ -17,10 +18,26 @@
         typeEffect();
     });
 
-    const allActiveDiscounts = computed(() => [
-        ...(props.diskonThresholdByProduct || []), 
-        ...(props.diskonThresholdByOrder || [])
-    ]);
+    const allActiveDiscounts = computed(() => {
+        const kategoriDiskonMap = new Map(props.kategoriDiskons.map(k => [k.id, k.nama_kategori_diskon]));
+        return [
+            ...(props.diskonThresholdByProduct?.map(diskon => ({
+                ...diskon, type: 'product',nama_kategori_diskon: kategoriDiskonMap.get(diskon.kategori_diskons_id) || "Kategori Tidak Ditemukan" 
+            })) || []),
+            ...(props.diskonThresholdByOrder?.map(diskon => ({
+                ...diskon, type: 'order', nama_kategori_diskon: kategoriDiskonMap.get(diskon.kategori_diskons_id) || "Kategori Tidak Ditemukan"
+            })) || [])
+        ];
+    });
+
+
+
+    const usedDiscounts = computed(() => {
+        return allActiveDiscounts.value.filter(diskon => 
+            cart.value.some(item => item.note === diskon.nama_diskon)
+        );
+    });
+
 
     const getDiskonThresholdByProductData = computed(() => 
         props.product.find(p => p.id === props.diskonThresholdByProduct.target_product_id) || null
@@ -46,7 +63,7 @@
     const isAmountPaidModalOpen = ref(false);
     const isGuestEditModalOpen = ref(false);
     const isChangeModalOpen = ref(false);
-    const isCheckDiscountModalOpen = ref(true);
+    const isCheckDiscountModalOpen = ref(false);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -245,11 +262,19 @@
     };
 
 
+    const closeCheckDiscountModal = () => {
+        isCheckDiscountModalOpen.value = false;
+    };
+    const openCheckDiscountModal = () => {
+        !isCheckDiscountModalOpen.value ? isCheckDiscountModalOpen.value = true : isCheckDiscountModalOpen.value = false;
+    };
+    
     const closePaymentModal = () => {
         isPaymentModalOpen.value = false;
     };
     const openPaymentModal = () => {
-        isPaymentModalOpen.value = true;
+        !isPaymentModalOpen.value ? isPaymentModalOpen.value = true : isPaymentModalOpen.value = false;
+
     };
     const confirmPayment = (selectedPayment) => {
         isConfirmPayment = true;
@@ -766,19 +791,47 @@
                     </div>
                 </div>
                 <!-- Check Discount Modal -->
-                <div v-if="isCheckDiscountModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closePaymentModal">
-                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[13rem] -translate-y-1/2 bg-white rounded-2xl w-[35rem] shadow-2xl">
+                <div v-if="isCheckDiscountModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closeCheckDiscountModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[12rem] -translate-y-1/2 bg-white rounded-2xl w-[37rem] shadow-2xl">
                         <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
                             <div class="flex w-9 h-9 bg-white"></div>
-                            <h2 class="text-normal font-normal">Check Discount</h2>
-                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closePaymentModal">
+                            <div class="flex flex-col justify-center items-center">
+                                <h2 class="text-normal font-normal">Check Discount</h2>
+                                <h2 class="text-normal font-normal text-gray-500">Discounts will used automatically</h2>
+                            </div>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeCheckDiscountModal">
                                 <i class="bi bi-x-lg text-current"></i>
                             </div>
                         </div>
-                        <div class="flex w-full flex-col px-3 max-h-96 overflow-auto mb-5">
+                        <div class="flex w-full flex-col px-3 max-h-[34rem] overflow-auto mb-5">
+                            <div class="flex flex-row items-center justify-between mt-4 w-44 mx-auto text-gray-500">
+                                    <div class="flex flex-row">
+                                        <div class="flex items-center justify-center p-1 rounded-full bg-rose-200 mr-2">
+                                            <div class="bg-[#FC4A4A] p-2 rounded-full"></div>
+                                        </div>
+                                        Not used
+                                    </div>
+                                    <div class="flex flex-row">
+                                        <div class="flex items-center justify-center p-1 rounded-full bg-[#d4ffea] mr-2">
+                                            <div class="bg-[#1C8370] p-2 rounded-full"></div>
+                                        </div>
+                                        Used
+                                    </div>
+                                </div>
                             <div v-for="diskon in allActiveDiscounts" :key="diskon.id">
-                                <div class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">{{ payment.payment_name }}</div>
-                            </div>
+                                <div class="flex flex-row w-full h-auto mt-4 rounded-2xl bg-gray-100 justify-start items-center">
+                                    <div class="flex w-[25%] h-auto items-center justify-center border-r-2 border-gray-200">
+                                        <div class="flex items-center justify-center rounded-full p-2" :class="{'bg-[#d4ffea]': usedDiscounts.some(d => d.id === diskon.id), 'bg-rose-200': !usedDiscounts.some(d => d.id === diskon.id)}">
+                                            <div class="p-4 rounded-full" :class="{'bg-[#1C8370]': usedDiscounts.some(d => d.id === diskon.id), 'bg-[#FC4A4A]': !usedDiscounts.some(d => d.id === diskon.id)}"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex w-full h-full flex-col px-5 items-start justify-center py-7">
+                                        <div class="text-gray-600 text-[1.14rem] font-medium">{{ diskon.nama_diskon }}</div>
+                                        <div class="text-[#2D71F8] text-[0.87rem] font-medium">{{ diskon.nama_kategori_diskon }} <span class="text-gray-500">|| {{ diskon.stok_diskon }} Tersisa </span> </div>
+                                        <div class="text-gray-500 text-[1rem] font-medium">{{ diskon.deskripsi_diskon }}</div>
+                                    </div>
+                                </div>
+                            </div>  
                         </div>
                     </div>
                 </div>
@@ -905,7 +958,7 @@
                             </div>
                         </div>
                         <div class="flex flex-row h-auto w-full px-3 pt-3 pb-3 justify-between items-center">
-                        <div class="flex flex-row w-[48.5%] font-[500] text-gray-400 bg-[#F6F6F6] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                        <div @click="(openCheckDiscountModal)" class="flex flex-row w-[48.5%] font-[500] text-gray-400 bg-[#F6F6F6] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">Check Discount</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-white">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DiskonThresholdByOrderResource\Pages;
 use App\Filament\Resources\DiskonThresholdByOrderResource\RelationManagers;
 use App\Models\DiskonThresholdByOrder;
+use App\Models\KategoriDiskon;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -33,8 +34,25 @@ class DiskonThresholdByOrderResource extends Resource
                 Forms\Components\Hidden::make('outlets_id')
                     ->default(Auth::user()->outlets_id),
                 Forms\Components\TextInput::make('nama_diskon')
+                    ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('kategori_diskons_id')
+                    ->label('Kategori')
+                    ->required()
+                    ->options(function () {
+                        return KategoriDiskon::where('outlets_id', Auth::user()->outlets_id)
+                            ->pluck('nama_kategori_diskon', 'id');
+                    })
+                    ->searchable(),
+                Forms\Components\TextInput::make('deskripsi_diskon')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('stok_diskon')
+                    ->required()
+                    ->label('Masukkan stok diskon')
+                    ->numeric(),
                 Forms\Components\TextInput::make('minimum_order_amount')
+                    ->required()
                     ->suffix('IDR')
                     ->numeric(),
                 Forms\Components\Select::make('target_product_id')
@@ -46,6 +64,7 @@ class DiskonThresholdByOrderResource extends Resource
                     })
                     ->searchable(),
                 Forms\Components\TextInput::make('target_product_quantity')
+                    ->required()
                     ->numeric(),
                 Forms\Components\Toggle::make('is_active'),
             ]);
@@ -56,6 +75,10 @@ class DiskonThresholdByOrderResource extends Resource
         return $table
             ->poll('5s')
             ->columns([
+                Tables\Columns\TextColumn::make('kategoriDiskon.nama_kategori_diskon')
+                    ->badge()
+                    ->color('danger')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()
                     ->color('success')
@@ -65,6 +88,8 @@ class DiskonThresholdByOrderResource extends Resource
                     ->color('success')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('nama_diskon')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('deskripsi_diskon')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('minimum_order_amount')
                     ->numeric()
@@ -78,6 +103,11 @@ class DiskonThresholdByOrderResource extends Resource
                 Tables\Columns\TextColumn::make('target_product_quantity')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('stok_diskon')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state)
+                    ->color(fn ($state) => $state > 50 ? 'success' : ($state > 10 ? 'warning' : 'danger'))
+                    ->searchable(),
                 Tables\Columns\ToggleColumn::make('is_active'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

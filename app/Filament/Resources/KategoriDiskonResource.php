@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RestoResource\Pages;
-use App\Filament\Resources\RestoResource\RelationManagers;
-use App\Models\Resto;
+use App\Filament\Resources\KategoriDiskonResource\Pages;
+use App\Filament\Resources\KategoriDiskonResource\RelationManagers;
+use App\Models\KategoriDiskon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,29 +12,26 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
-class RestoResource extends Resource
+class KategoriDiskonResource extends Resource
 {
-    protected static ?string $model = Resto::class;
+    protected static ?string $model = KategoriDiskon::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
-    protected static ?string $activeNavigationIcon = 'heroicon-s-building-storefront';
-    protected static ?string $navigationLabel = 'Management Resto';
-    protected static ?string $navigationGroup = 'F&B Core';
+    protected static ?string $navigationIcon = 'heroicon-o-queue-list';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-queue-list';
+    protected static ?string $navigationLabel = 'Kategori Diskon';
+    protected static ?string $navigationGroup = 'Category';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama_resto')
-                    ->required()
-                    ->placeholder('Nama Resto')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('deskripsi')
-                    ->placeholder('Deskripsi Resto')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('alamat')
-                    ->placeholder('Alamat Resto')
+                Forms\Components\Hidden::make('restos_id')
+                    ->default(Auth::user()->restos_id),
+                Forms\Components\Hidden::make('outlets_id')
+                    ->default(Auth::user()->outlets_id),
+                Forms\Components\TextInput::make('nama_kategori_diskon')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -43,15 +40,16 @@ class RestoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-           ->poll('5s')
             ->columns([
-                Tables\Columns\TextColumn::make('nama_resto')
+                Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()
                     ->color('success')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('alamat')
+                Tables\Columns\TextColumn::make('outlet.nama_outlet')
+                    ->badge()
+                    ->color('success')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('deskripsi')
+                Tables\Columns\TextColumn::make('nama_kategori_diskon')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -85,8 +83,8 @@ class RestoResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRestos::route('/'),
-            'create' => Pages\CreateResto::route('/create'),
+            'index' => Pages\ListKategoriDiskons::route('/'),
+            'create' => Pages\CreateKategoriDiskon::route('/create'),
         ];
     }
 }

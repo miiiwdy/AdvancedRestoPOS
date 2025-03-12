@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DiskonThresholdByOrder extends Model
+class KategoriDiskon extends Model
 {
     use HasFactory;
     protected $guarded = [
@@ -19,12 +19,12 @@ class DiskonThresholdByOrder extends Model
     {
         return $this->belongsTo(Outlet::class, 'outlets_id');
     }
-    public function product()
+    public function diskonThresholdByProduct()
     {
-        return $this->belongsTo(Product::class, 'target_product_id');
+        return $this->hasMany(diskonThresholdByProduct::class);
     }
-    public function kategoriDiskon()
+    public function diskonThresholdByOrder()
     {
-        return $this->belongsTo(kategoriDiskon::class, 'kategori_diskons_id');
+        return $this->hasMany(diskonThresholdByOrder::class);
     }
 }

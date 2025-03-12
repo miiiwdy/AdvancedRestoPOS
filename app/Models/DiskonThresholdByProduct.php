@@ -27,4 +27,8 @@ class DiskonThresholdByProduct extends Model
     {
         return $this->belongsTo(Product::class, 'target_product_id');
     }
+    public function kategoriDiskon()
+    {
+        return $this->belongsTo(kategoriDiskon::class, 'kategori_diskons_id');
+    }
 }

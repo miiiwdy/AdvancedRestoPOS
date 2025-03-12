@@ -7,7 +7,7 @@
         namaKasir: String,
         pajak: Number,
         payment: Array,
-        diskonThresholdByOrder: Object,
+        diskonThresholdByOrder: Array,
         diskonThresholdByProduct: Array,
     })
 
@@ -16,6 +16,11 @@
         setInterval(updateDateTime, 1000);
         typeEffect();
     });
+
+    const allActiveDiscounts = computed(() => [
+        ...(props.diskonThresholdByProduct || []), 
+        ...(props.diskonThresholdByOrder || [])
+    ]);
 
     const getDiskonThresholdByProductData = computed(() => 
         props.product.find(p => p.id === props.diskonThresholdByProduct.target_product_id) || null
@@ -41,6 +46,7 @@
     const isAmountPaidModalOpen = ref(false);
     const isGuestEditModalOpen = ref(false);
     const isChangeModalOpen = ref(false);
+    const isCheckDiscountModalOpen = ref(true);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -183,7 +189,7 @@
             if (!isBonusExist) {
             applicableDiscounts2.forEach((diskon) => {
                 const relatedProduct2 = props.product.find(p => p.id === diskon.target_product_id) || {};
-                cart.value.push({
+                cart.value.unshift({
                     np: relatedProduct2.nama_product || "Tidak Ditemukan",
                     kode_product: relatedProduct2.kode_product || "Tidak Ditemukan",
                     deskripsi_product: relatedProduct2.deskripsi_product || "Tidak Ditemukan",
@@ -222,12 +228,12 @@
             cartItem.tt_b = cartItem.hj * cartItem.quantity;
             cartItem.total_pajak = cartItem.tt_b * (props.pajak / 100);
             cartItem.tt_a = cartItem.tt_b + cartItem.total_pajak;
-            const applicableDiscounts = props.diskonThresholdByProduct.filter(
+            const applicableDiscounts3 = props.diskonThresholdByProduct.filter(
                 (diskon) => cartItem.id_product === diskon.product_id && cartItem.quantity < diskon.minimum_items_count
             );
-            if (applicableDiscounts.length > 0) {
+            if (applicableDiscounts3.length > 0) {
                 for (let i = cart.value.length - 1; i >= 0; i--) {
-                    if (cart.value[i].note && applicableDiscounts.some(d => cart.value[i].note === d.nama_diskon)) {
+                    if (cart.value[i].note && applicableDiscounts3.some(d => cart.value[i].note === d.nama_diskon)) {
                         cart.value.splice(i, 1);
                     }
                 }
@@ -328,7 +334,7 @@
             //     // const totalHargaJualDTBP = DTBP_harga_product.value * props.diskonThresholdByProduct.target_product_quantity;
             //     // const totalPajakDTBP = totalHargaJualDTBP * (props.pajak / 100);
             //     // const totalHargaAfterDTBP = totalHargaJualDTBP + totalPajakDTBP;
-            //     cart.value.push({
+            //     cart.value.unshift({
             //         np: DTBP_nama_product.value,
             //         kode_product: DTBP_kode_product.value,
             //         deskripsi_product: DTBP_deskripsi_product.value,
@@ -363,7 +369,7 @@
 
             applicableDiscounts.forEach((diskon) => {
                 const relatedProduct = props.product.find(p => p.id === diskon.target_product_id) || {};
-                cart.value.push({
+                cart.value.unshift({
                     np: relatedProduct.nama_product || "Tidak Ditemukan",
                     kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
                     deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
@@ -390,7 +396,7 @@
             });
             console.log("Diskon yang diterapkan:", applicableDiscounts);
 
-            cart.value.push({
+            cart.value.unshift({
                 np: selectedProduct.value.nama_product,
                 kode_product: selectedProduct.value.kode_product,
                 deskripsi_product: selectedProduct.value.deskripsi_product,
@@ -759,6 +765,23 @@
                         </div>
                     </div>
                 </div>
+                <!-- Check Discount Modal -->
+                <div v-if="isCheckDiscountModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closePaymentModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[13rem] -translate-y-1/2 bg-white rounded-2xl w-[35rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                            <h2 class="text-normal font-normal">Check Discount</h2>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closePaymentModal">
+                                <i class="bi bi-x-lg text-current"></i>
+                            </div>
+                        </div>
+                        <div class="flex w-full flex-col px-3 max-h-96 overflow-auto mb-5">
+                            <div v-for="diskon in allActiveDiscounts" :key="diskon.id">
+                                <div class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">{{ payment.payment_name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <transition name="slide">
                 <div v-if="showCart" class="cart flex flex-col  w-[32.6%] h-screen bg-white shadow-2xl shadow-slate-100 z-50">
@@ -789,58 +812,6 @@
                         </div>
                     </div>
                     <div class="h-full overflow-auto">
-                        <!-- <div v-if="cart.length > 0" v-for="(item, index) in cart" :key="index" class=" flex flex-row w-full h-28 px-3 border-dashed" :class="{ 'border-t-2': index !== 0, 'relative before:block before:content-[\' \'] before:absolute before:top-0 before:right-0 before:bottom-0 before:w-40 before:bg-gradient-to-l before:from-green-500/30 before:to-transparent shadow-inner': item.note === props.diskonThresholdByProduct.nama_diskon }">
-                            <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
-                                <img class="max-h-12 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + item.foto_product">
-                            </div>
-                            <div  class="mid flex flex-col w-full mt-3 pl-3 h-auto items-start">
-                                <div class="text-sm text-slate-800 font-medium">{{ item.np }} x {{ item.quantity }}</div>
-                                <div v-if="item.note === props.diskonThresholdByProduct.nama_diskon" class="text-sm text-[#1C8370] font-medium">{{ props.diskonThresholdByProduct.nama_diskon }}</div>
-                                <div v-else class="text-sm text-[#2D71F8] font-medium">Rp{{ formatCurrency(item.tt_b) }}</div>
-                                
-                                <div class="flex flex-row mt-2 w-full justify-between">
-                                    <div class="flex flex-row">
-                                        <div v-if="item.note === props.diskonThresholdByProduct.nama_diskon" class="flex items-center justify-center bg-[#d4ffea] w-9 h-9 rounded-full cursor-pointer">
-                                            <div class="flex items-center justify-center bg-[#1C8370] w-7 h-7 rounded-full text-white">
-                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
-                                            </div>
-                                        </div>
-                                        <div v-if="item.note.length > 0 && item.note !== props.diskonThresholdByProduct.nama_diskon"class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
-                                            <div @click="openCartNoteModal(item)" class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
-                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
-                                            </div>
-                                        </div>
-
-                                        <div v-else-if="item.note !== props.diskonThresholdByProduct.nama_diskon" @click="openCartNoteModal(item)" class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
-                                            <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
-                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
-                                            </div>
-                                        </div>
-                                        <div v-if="item.note !== props.diskonThresholdByProduct.nama_diskon" @click="removeFromCart(index)" class="ml-2 flex items-center justify-center bg-rose-200 w-9 h-9 rounded-full cursor-pointer">
-                                            <div class="flex items-center justify-center bg-[#FC4A4A] w-7 h-7 rounded-full text-white">
-                                                <i class="ri-delete-bin-line text-current text-sm text-current"></i>
-                                            </div>
-                                        </div>
-                                        <div v-if="item.note === props.diskonThresholdByProduct.nama_diskon" class="ml-2 quantity w-9 h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-center items-center px-1">
-                                            <div class="text-sm flex items-center justify-center bg-white w-7 h-7 rounded-full">{{ item.quantity }}</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div v-if="item.note !== props.diskonThresholdByProduct.nama_diskon" class=" quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
-                                        <div @click="decreaseExistQty(item)" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-dash text-xs"></i>
-                                        </div>
-                                        <div class="text-sm">{{ item.quantity }}</div>
-                                        <div @click="increaseExistQty(item)" class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
-                                            <i class="bi bi-plus-lg text-xs"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="flex flex-row w-full items-center justify-center h-28 px-3 items border-b-2 border-dashed">
-                            <div class="text-sm text-gray-400">No Item Selected</div>
-                        </div> -->
                         <div v-if="cart.length > 0" v-for="(item, index) in cart" :key="index" class="flex flex-row w-full h-28 px-3 border-dashed" :class="{ 'border-t-2': index !== 0, 'relative before:block before:content-[\' \'] before:absolute before:top-0 before:right-0 before:bottom-0 before:w-40 before:bg-gradient-to-l before:from-green-500/30 before:to-transparent shadow-inner': props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)}">
                         <div class="mt-3 img rounded-xl w-[7.1rem] h-[5.2rem] bg-[#F5F5F5] flex justify-center items-center">
                             <img class="max-h-12 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + item.foto_product">
@@ -859,36 +830,28 @@
                             <div class="flex flex-row mt-2 w-full justify-between">
                                 <div class="flex flex-row">
                                     <div v-for="diskon in props.diskonThresholdByProduct" :key="diskon.nama_diskon">
-                                        <div v-if="item.note === diskon.nama_diskon"
-                                            class="flex items-center justify-center bg-[#d4ffea] w-9 h-9 rounded-full cursor-pointer">
+                                        <div v-if="item.note === diskon.nama_diskon"class="flex items-center justify-center bg-[#d4ffea] w-9 h-9 rounded-full">
                                             <div class="flex items-center justify-center bg-[#1C8370] w-7 h-7 rounded-full text-white">
-                                                <i class="ri-pencil-line text-current text-sm text-current"></i>
+                                                <i class="ri-discount-percent-line text-sm text-current flex items-center justify-center"></i>
                                             </div>
                                         </div>
                                     </div>
-                                    <div v-if="item.note.length > 0 && !props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)"
-                                        class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
-                                        <div @click="openCartNoteModal(item)"
-                                            class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
+                                    <div v-if="item.note.length > 0 && !props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)"class="flex items-center justify-center bg-[#bad1ff] w-9 h-9 rounded-full cursor-pointer">
+                                        <div @click="openCartNoteModal(item)" class="flex items-center justify-center bg-[#2D71F8] w-7 h-7 rounded-full text-white">
                                             <i class="ri-pencil-line text-current text-sm text-current"></i>
                                         </div>
                                     </div>
-                                    <div v-else-if="!props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)"
-                                        @click="openCartNoteModal(item)"
-                                        class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
+                                    <div v-else-if="!props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)" @click="openCartNoteModal(item)"class="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-full cursor-pointer">
                                         <div class="flex items-center justify-center bg-white w-7 h-7 rounded-full text-gray-700">
                                             <i class="ri-pencil-line text-current text-sm text-current"></i>
                                         </div>
                                     </div>
-                                    <div v-if="!props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)"
-                                        @click="removeFromCart(index)"
-                                        class="ml-2 flex items-center justify-center bg-rose-200 w-9 h-9 rounded-full cursor-pointer">
+                                    <div v-if="!props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)" @click="removeFromCart(index)"class="ml-2 flex items-center justify-center bg-rose-200 w-9 h-9 rounded-full cursor-pointer">
                                         <div class="flex items-center justify-center bg-[#FC4A4A] w-7 h-7 rounded-full text-white">
                                             <i class="ri-delete-bin-line text-current text-sm text-current"></i>
                                         </div>
                                     </div>
-                                    <div v-if="props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)"
-                                        class="ml-2 quantity w-9 h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-center items-center px-1">
+                                    <div v-if="props.diskonThresholdByProduct.some(diskon => item.note === diskon.nama_diskon)" class="ml-2 quantity w-9 h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-center items-center px-1">
                                         <div class="text-sm flex items-center justify-center bg-white w-7 h-7 rounded-full">
                                             {{ item.quantity }}
                                         </div>
@@ -943,15 +906,17 @@
                         </div>
                         <div class="flex flex-row h-auto w-full px-3 pt-3 pb-3 justify-between items-center">
                         <div class="flex flex-row w-[48.5%] font-[500] text-gray-400 bg-[#F6F6F6] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
-                            <div class="text-sm font-normal w-auto">Add Promo</div>
+                            <div class="text-sm font-normal w-auto">Check Discount</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-white">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
                             </div>
-                            <!-- <div class="text-sm font-normal w-auto">Promo applied</div>
+                        </div>
+                        <!-- <div class="flex flex-row w-[48.5%] font-[500] text-[#1C8370] border border-[#1C8370] bg-[#f7fffc] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                            <div class="text-sm font-normal w-auto pr-1">Discount applied</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#1C8370]">
                                 <i class="ri-discount-percent-line text-current text-xl"></i>
-                            </div> -->
-                        </div>
+                            </div>
+                        </div> -->
                         <div @click="(openPaymentModal)" v-if="!isAmountPaidModalOpen" class="flex flex-row w-[48.5%] font-[500] text-black bg-white border border-slate-700 cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-[#F6F6F6]">

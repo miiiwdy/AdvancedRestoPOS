@@ -38,7 +38,7 @@ class DataPosController extends Controller
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
             ['is_active', '=', true],
-        ])->first();
+        ])->get();
         $diskonThresholdByProduct = DiskonThresholdByProduct::where([
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],

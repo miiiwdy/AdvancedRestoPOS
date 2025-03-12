@@ -653,7 +653,7 @@
                         <i class="bi bi-search text-lg text-current"></i>
                     </div>
                 </div>
-                <div class="flex flex-wrap flex-row gap-[1.20rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
+                <div class="flex flex-wrap justify-center flex-row gap-[1.20rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
                     <div v-for="product in filteredAndSortedProducts" :key="product.id" @click="openModal(product)" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
                         <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
                             <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + product.foto_product" alt="">

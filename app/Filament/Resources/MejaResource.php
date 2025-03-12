@@ -51,6 +51,7 @@ class MejaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('5s')
             ->columns([
                 Tables\Columns\TextColumn::make('kategoriMeja.nama_kategori_meja')
                     ->label('Kategori Meja')

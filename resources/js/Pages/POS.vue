@@ -94,22 +94,32 @@
     var index = 0;
     var isDeleting = false;
     var isConfirmPayment = false;
-    var isConfirmTable = false;
 
     const toggleCart = () => {
         showCart.value = !showCart.value;
     };
     const toggleGuest = () => {
-        !isGuestEditModalOpen.value ? isGuestEditModalOpen.value = true : isGuestEditModalOpen.value = false;
+        if (isConfirmPayment) return;
+        if (!isGuestEditModalOpen.value) {
+            isGuestEditModalOpen.value = true;
+        }
+        else {
+            isGuestEditModalOpen.value = false;
+        }
     }
 
     const storeGuest = () => {
+        if (guest.value === 0) {
+            console.log('guest value gabisa 0, tmbahin dong');
+            return;
+        }
         cart.value.forEach(item => {
                 item.guest = guest.value;
             });
-        toggleGuest();
+        isGuestEditModalOpen.value = false;
     }
     const openModal = (product) => {
+        if (isConfirmPayment) return;
         selectedProduct.value = product;
         isModalOpen.value = true;
         const existingProductIndex = cart.value.findIndex(item => item.kode_product === selectedProduct.value.kode_product);
@@ -147,6 +157,7 @@
     }
 
     const closeCartNoteModal = () => {
+        if (isConfirmPayment) return;
         isCartNoteModalOpen.value = false;
         selectedCartProduct.value = null;
         note.value = '';
@@ -198,11 +209,11 @@
         isPaymentModalOpen.value = false;
     };
     const openPaymentModal = () => {
+        if(isConfirmPayment) return;
         !isPaymentModalOpen.value ? isPaymentModalOpen.value = true : isPaymentModalOpen.value = false;
 
     };
     const confirmPayment = (selectedPayment) => {
-        isConfirmPayment = true;
         if (!selectedPayment || !selectedPayment.payment_name) {
             console.warn("Payment method not selected 1");
             isPaymentModalOpen.value = false;
@@ -226,6 +237,7 @@
             return;
         }
         else {
+            isConfirmPayment = true;
             paymentData.value = selectedPayment.payment_name;
             cart.value.forEach(item => {
                 item.payment = paymentData.value;
@@ -239,11 +251,11 @@
         isTableModalOpen.value = false;
     };
     const openTableModal = () => {
+        if (isConfirmPayment) return;
         !isTableModalOpen.value ? isTableModalOpen.value = true : isTableModalOpen.value = false;
 
     };
     const confirmTable = (selectedTable) => {
-        isConfirmTable = true;
         if (!selectedTable || !selectedTable.nomor_meja) {
             console.warn("Table not selected");
             isTableModalOpen.value = false;
@@ -296,6 +308,7 @@
     }
 
     const getOrderType = () => {
+        if (isConfirmPayment) return;
         if (orderType.value === 'Dine In') {
             orderType.value = 'Take Away';
             isTableActive.value = false;
@@ -320,7 +333,6 @@
 
     const increaseExistQty = (item) => {
         if (isConfirmPayment) return;
-        if (isConfirmTable) return;
         const cartItem = cart.value.find(cartItem => cartItem.id_product === item.id_product); 
         if (cartItem) {
             cartItem.quantity++;
@@ -370,7 +382,6 @@
 
     const decreaseExistQty = (item) => {
         if (isConfirmPayment) return;
-        if (isConfirmTable) return;
         const cartItem = cart.value.find(cartItem => cartItem.id_product === item.id_product);
         if (cartItem && cartItem.quantity > 1) {
             cartItem.quantity--;
@@ -476,7 +487,7 @@
 
     const confirmOrder = () => {
         if (paymentData.value === "Payment" || !paymentData.value) {
-            console.log('adawd');
+            console.log('payment blm dipilih');
             return;
         }
         if (cart.value.length === 0) {
@@ -1048,13 +1059,13 @@
                             </div>
                         </div>
 
-                        <div @click="(openPaymentModal)" v-if="!isAmountPaidModalOpen" class="flex flex-row w-[48.5%] font-[500] text-black bg-white border border-slate-700 cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                        <div @click="(openPaymentModal)" v-if="!isConfirmPayment" class="flex flex-row w-[48.5%] font-[500] text-black bg-white border border-slate-700 cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-slate-700 bg-[#F6F6F6]">
                                 <i class="ri-bank-card-line text-current text-xl"></i>
                             </div>
                         </div>
-                        <div v-if="isAmountPaidModalOpen" class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
+                        <div v-if="isConfirmPayment" class="flex flex-row w-[48.5%] font-[500] text-[#2D71F8] bg-[#f5f8ff] border border-[#2D71F8] cursor-pointer items-center justify-between rounded-full pl-4 pr-1 py-1">
                             <div class="text-sm font-normal w-auto">{{ paymentData }}</div>
                             <div class="icons flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#2D71F8]">
                                 <i class="ri-bank-card-line text-current text-xl"></i>

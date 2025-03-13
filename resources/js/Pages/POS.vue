@@ -372,6 +372,7 @@
                     guest: guest.value || '',
                     orderType: orderType.value,
                     table: tableData.value,
+                    is_product_diskon: true,
                     id_product: relatedProduct2.id || "Tidak Ditemukan",
                 });
             });
@@ -449,6 +450,7 @@
                     guest: guest.value || '',
                     orderType: orderType.value,
                     table: tableData.value,
+                    is_product_diskon: true,
                     id_product: relatedProduct.id || "Tidak Ditemukan",
                 });
             });
@@ -477,6 +479,7 @@
                 guest: guest.value || '',
                 orderType: orderType.value,
                 table: tableData.value,
+                is_product_diskon: false,
                 id_product: selectedProduct.value.id,
             })
             console.log(cart);

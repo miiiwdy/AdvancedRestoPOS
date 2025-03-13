@@ -10,6 +10,7 @@
         diskonThresholdByOrder: Array,
         diskonThresholdByProduct: Array,
         kategoriDiskons: Array,
+        table: Array,
     })
 
     onMounted(() => {
@@ -62,6 +63,7 @@
     const date = ref("");
     const activeMenu = ref(1337);
     const searchQuery = ref('');
+    const searchQueryTables = ref('');
     const isModalOpen = ref(false);
     const isCartNoteModalOpen = ref(false);
     const isPaymentModalOpen = ref(false);
@@ -69,6 +71,7 @@
     const isGuestEditModalOpen = ref(false);
     const isChangeModalOpen = ref(false);
     const isCheckDiscountModalOpen = ref(false);
+    const isTableModalOpen = ref(true);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -77,6 +80,7 @@
     const showCart = ref(true);
     const orderID = ref('');
     const orderType = ref('Dine In')
+    const tableData = ref('');
     const guest = ref(0);
     const paymentData = ref('Payment');
     const placeholderText = "Search something sweet on your mind here...";
@@ -89,6 +93,7 @@
     var index = 0;
     var isDeleting = false;
     var isConfirmPayment = false;
+    var isConfirmTable = false;
 
 
     const toggleCart = () => {
@@ -182,6 +187,105 @@
         change.value = 0;
     }
 
+    const closeCheckDiscountModal = () => {
+        isCheckDiscountModalOpen.value = false;
+    };
+    const openCheckDiscountModal = () => {
+        !isCheckDiscountModalOpen.value ? isCheckDiscountModalOpen.value = true : isCheckDiscountModalOpen.value = false;
+    };
+    
+    const closePaymentModal = () => {
+        isPaymentModalOpen.value = false;
+    };
+    const openPaymentModal = () => {
+        !isPaymentModalOpen.value ? isPaymentModalOpen.value = true : isPaymentModalOpen.value = false;
+
+    };
+    const confirmPayment = (selectedPayment) => {
+        isConfirmPayment = true;
+        if (!selectedPayment || !selectedPayment.payment_name) {
+            console.warn("Payment method not selected 1");
+            isPaymentModalOpen.value = false;
+            return;
+        }
+        if (cart.value.length === 0) {
+            console.warn("cart lo kosong");
+            isPaymentModalOpen.value = false;
+            return;
+        }
+        else {
+            paymentData.value = selectedPayment.payment_name;
+            cart.value.forEach(item => {
+                item.payment = paymentData.value;
+            });
+            isPaymentModalOpen.value = false;
+            isAmountPaidModalOpen.value = true;
+        }
+    };
+
+    const closeTableModal = () => {
+        isTableModalOpen.value = false;
+    };
+    const openTableModal = () => {
+        !isTableModalOpen.value ? isTableModalOpen.value = true : isTableModalOpen.value = false;
+
+    };
+    const confirmTable = (selectedTable) => {
+        isConfirmTable = true;
+        if (!selectedTable || !selectedTable.nomor_meja) {
+            console.warn("Table not selected");
+            isTableModalOpen.value = false;
+            return;
+        }
+        else {
+            tableData.value = selectedTable.nomor_meja;
+            cart.value.forEach(item => {
+                item.table = tableData.value;
+            });
+            isTableModalOpen.value = false;
+        }
+    };
+
+    const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
+    const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
+    const calculateTotal = () => cart.value.reduce((sum, item) => sum + item.tt_a, 0);
+    
+    const totalRounding = () => {
+        totalAfterRounding.value = calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
+        cart.value.forEach(item => {
+            item.total_after_rounding = totalAfterRounding.value;
+        });
+        return calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
+    }
+    const roundingAmount = () => {
+        const total = calculateTotal();
+        const roundedTotal = totalRounding();
+        rounding.value = roundedTotal - total;
+
+        console.log("calculateTotal:", total);
+        console.log("totalRounding:", roundedTotal);
+        cart.value.forEach(item => {
+            item.rounding = rounding.value;
+        });
+        return roundedTotal - total;
+    }
+    
+    function createorderID() {
+        if (!orderID.value) {
+            const hurup = Math.random().toString(36).replace(/[^a-z]/g, '').substring(0, 3).toUpperCase();
+            const angka = Math.floor(Math.random() * 900) + 100;
+            const ON = hurup + angka;
+            orderID.value = ON;
+            return ON
+        }
+        else {
+            return orderID.value;
+        }
+    }
+
+    const getOrderType = () => {
+        orderType.value = orderType.value === 'Dine In' ? 'Take Away' : 'Dine In';
+    }
 
     const increaseQty = () => {
         quantity.value++
@@ -233,6 +337,7 @@
                     orderID: createorderID(),
                     guest: guest.value || '',
                     orderType: orderType.value,
+                    table: tableData.value,
                     id_product: relatedProduct2.id || "Tidak Ditemukan",
                 });
             });
@@ -264,83 +369,6 @@
             }
         }
     };
-
-    const closeCheckDiscountModal = () => {
-        isCheckDiscountModalOpen.value = false;
-    };
-    const openCheckDiscountModal = () => {
-        !isCheckDiscountModalOpen.value ? isCheckDiscountModalOpen.value = true : isCheckDiscountModalOpen.value = false;
-    };
-    
-    const closePaymentModal = () => {
-        isPaymentModalOpen.value = false;
-    };
-    const openPaymentModal = () => {
-        !isPaymentModalOpen.value ? isPaymentModalOpen.value = true : isPaymentModalOpen.value = false;
-
-    };
-    const confirmPayment = (selectedPayment) => {
-        isConfirmPayment = true;
-        if (!selectedPayment || !selectedPayment.payment_name) {
-            console.warn("Payment method not selected 1");
-            isPaymentModalOpen.value = false;
-            return;
-        }
-        if (cart.value.length === 0) {
-            console.warn("cart lo kosong");
-            isPaymentModalOpen.value = false;
-            return;
-        }
-        else {
-            paymentData.value = selectedPayment.payment_name;
-            cart.value.forEach(item => {
-                item.payment = paymentData.value;
-            });
-            isPaymentModalOpen.value = false;
-            isAmountPaidModalOpen.value = true;
-        }
-    };
-
-    const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
-    const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
-    const calculateTotal = () => cart.value.reduce((sum, item) => sum + item.tt_a, 0);
-    
-    const totalRounding = () => {
-        totalAfterRounding.value = calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
-        cart.value.forEach(item => {
-            item.total_after_rounding = totalAfterRounding.value;
-        });
-        return calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
-    }
-    const roundingAmount = () => {
-        const total = calculateTotal();
-        const roundedTotal = totalRounding();
-        rounding.value = roundedTotal - total;
-
-        console.log("calculateTotal:", total);
-        console.log("totalRounding:", roundedTotal);
-        cart.value.forEach(item => {
-            item.rounding = rounding.value;
-        });
-        return roundedTotal - total;
-    }
-    
-    function createorderID() {
-        if (!orderID.value) {
-            const hurup = Math.random().toString(36).replace(/[^a-z]/g, '').substring(0, 3).toUpperCase();
-            const angka = Math.floor(Math.random() * 900) + 100;
-            const ON = hurup + angka;
-            orderID.value = ON;
-            return ON
-        }
-        else {
-            return orderID.value;
-        }
-    }
-
-    const getOrderType = () => {
-        orderType.value = orderType.value === 'Dine In' ? 'Take Away' : 'Dine In';
-    }
 
     const addToCart = () => {
         if (selectedProduct.value) {
@@ -386,6 +414,7 @@
                     orderID: createorderID(),
                     guest: guest.value || '',
                     orderType: orderType.value,
+                    table: tableData.value,
                     id_product: relatedProduct.id || "Tidak Ditemukan",
                 });
             });
@@ -413,6 +442,7 @@
                 orderID: createorderID(),
                 guest: guest.value || '',
                 orderType: orderType.value,
+                table: tableData.value,
                 id_product: selectedProduct.value.id,
             })
             console.log(cart);
@@ -484,6 +514,17 @@
             }
             const matchesCategory = activeMenu.value ? product.kategoris_id === activeMenu.value : true;
             return matchesSearch && matchesCategory;
+        });
+        return filtered;
+    });
+
+    const filteredAndSortedTables = computed(() => {
+        if (!Array.isArray(props.table)) return [];
+
+        const query = searchQueryTables.value.toLowerCase();
+        const filtered = props.table.filter(table => {
+            const matchesSearch = table.nomor_meja.toLowerCase().includes(query);
+            return matchesSearch;
         });
         return filtered;
     });
@@ -816,6 +857,29 @@
                         </div>
                     </div>
                 </div>
+                <!-- meja Modal -->
+                <div v-if="isTableModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closeTableModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[31rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                            <h2 class="text-normal font-normal">Tables</h2>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeTableModal">
+                                <i class="bi bi-x-lg text-current"></i>
+                            </div>
+                        </div>
+                        <div class="flex w-full flex-col px-3 max-h-[30rem] overflow-auto mb-5">
+                            <div class="flex items-center justify-center w-full px-4 pr-1 bg-white rounded-full h-14 mt-4 py-2 mx-auto border">
+                                <input v-model="searchQueryTables" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" placeholder="Search Table number here."/>
+                                    <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
+                                    <i class="bi bi-search text-lg text-current"></i>
+                                </div>
+                            </div>
+                            <div v-for="tables in filteredAndSortedTables" :key="tables.id">
+                                <div @click="(confirmTable(tables))" class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">{{ tables.nomor_meja }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <transition name="slide">
                 <div v-if="showCart" class="cart flex flex-col  w-[32.6%] h-screen bg-white shadow-2xl shadow-slate-100 z-50">
@@ -832,10 +896,10 @@
                         </div>
                     </div>
                     <div class="flex flex-row h-auto w-full px-3 pt-2 pb-3 justify-between items-center shadow-lg shadow-gray-100">
-                        <div class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
-                            <div class="text-sm w-auto">Table M-001</div>
+                        <div @click="(openTableModal)" class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
+                            <div class="text-sm w-auto">Table {{ tableData.length > 0 ? tableData : '- - - -' }}</div>
                             <div class="icons flex items-center justify-center w-5 h-5 rounded-full bg-white">
-                                <i class="ri-arrow-down-s-fill"></i>
+                                <i class="ri-arrow-left-s-fill"></i>
                             </div>
                         </div>
                         <div @click=(getOrderType) class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">

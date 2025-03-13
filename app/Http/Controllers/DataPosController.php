@@ -6,6 +6,7 @@ use App\Models\DiskonThresholdByOrder;
 use App\Models\DiskonThresholdByProduct;
 use App\Models\Kategori;
 use App\Models\KategoriDiskon;
+use App\Models\Meja;
 use App\Models\Pajak;
 use App\Models\Payment;
 use App\Models\Product;
@@ -49,6 +50,10 @@ class DataPosController extends Controller
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
         ])->get();
+        $tables = Meja::where([
+            ['restos_id', '=', Auth::user()->restos_id],
+            ['outlets_id', '=', Auth::user()->outlets_id],
+        ])->get();
         $namaKasir = Auth::user()->name;
 
         return Inertia::render('POS', [
@@ -59,7 +64,8 @@ class DataPosController extends Controller
             'payment' => $payment,
             'diskonThresholdByOrder' => $diskonThresholdByOrder,
             'diskonThresholdByProduct' => $diskonThresholdByProduct,
-            'kategoriDiskons' => $kategoriDiskons
+            'kategoriDiskons' => $kategoriDiskons,
+            'table' => $tables,
         ]);
     }
 }

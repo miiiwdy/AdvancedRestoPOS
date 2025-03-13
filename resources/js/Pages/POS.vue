@@ -654,6 +654,16 @@
         .slide-enter-to, .slide-leave-from {
             transform: translateX(0);
         }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            scrollbar-width: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+        }
+
     </style>
     <template>
         <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select">
@@ -700,7 +710,7 @@
                     <i class="ri-file-list-3-line text-current text-xl"></i>
                 </div>
                 </div>
-                <div class="flex flex-row h-52 w-[100%] px-4 py-4 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap">
+                <div class="flex flex-row h-52 w-[100%] px-4 py-4 pb-2 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap no-scrollbar">
                     <div @click="toggleActive(1337)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === 1337 ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
                         <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === 1337 ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                             <i class="ri-restaurant-2-line text-xl text-current"></i>
@@ -721,13 +731,14 @@
                     </div>
                 </div>
                 <!-- search -->
-                <div class="flex items-center justify-center w-[97%] h-auto px-4 pr-2 bg-white rounded-full h-16 py-2 mx-auto">
-                    <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" :placeholder="displayPlaceholder"/>
-                        <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
+                <div class="flex items-center justify-center w-[97%] h-auto px-1 pr-1 bg-white rounded-full py-1 mx-auto">
+                    <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
                         <i class="bi bi-search text-lg text-current"></i>
                     </div>
+                    <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" :placeholder="displayPlaceholder"/>
                 </div>
-                <div class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
+
+                <div class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 mt-5 h-full pb-[15%] overflow-auto">
                     <div v-for="product in filteredAndSortedProducts" :key="product.id" @click="openModal(product)" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
                         <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
                             <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + product.foto_product" alt="">

@@ -485,7 +485,7 @@
             console.log(cart);
             console.log(cart.value.length);
             isModalOpen.value = false;
-            quantity.value = 0;
+            quantity.value = 1;
         }
     }
 
@@ -710,7 +710,7 @@
                     <i class="ri-file-list-3-line text-current text-xl"></i>
                 </div>
                 </div>
-                <div class="flex flex-row h-52 w-[100%] px-4 py-4 pb-2 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap no-scrollbar">
+                <div class="flex flex-row h-48 w-[100%] px-4 py-4 pb-4 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap no-scrollbar">
                     <div @click="toggleActive(1337)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === 1337 ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
                         <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === 1337 ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                             <i class="ri-restaurant-2-line text-xl text-current"></i>

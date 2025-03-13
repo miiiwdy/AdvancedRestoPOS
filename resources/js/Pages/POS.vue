@@ -485,24 +485,28 @@
             console.log(cart);
             console.log(cart.value.length);
             isModalOpen.value = false;
+            quantity.value = 0;
         }
     }
 
     const confirmOrder = () => {
-        if (paymentData.value === "Payment" || !paymentData.value) {
-            console.log('payment blm dipilih');
-            return;
-        }
         if (cart.value.length === 0) {
             console.log('Keranjang kosong. Silakan tambahkan produk.');
             return;
         }
         if (orderType.value === 'Dine In' && tableData.value === '') {
             console.log('table blm di input');
+            isTableModalOpen.value = true;
             return;
         }
         if (guest.value < 1) {
             console.log('guest blm di input');
+            isGuestEditModalOpen.value = true;
+            return;
+        }
+        if (paymentData.value === "Payment" || !paymentData.value) {
+            console.log('payment blm dipilih');
+            isPaymentModalOpen.value = true;
             return;
         }
         cart.value = [];

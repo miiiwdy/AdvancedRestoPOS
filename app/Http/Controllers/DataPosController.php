@@ -16,6 +16,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class DataPosController extends Controller
 {
@@ -57,6 +58,12 @@ class DataPosController extends Controller
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
         ])->get();
+        $DataOrder = LaporanOrder::where([
+            ['restos_id', '=', Auth::user()->restos_id],
+            ['outlets_id', '=', Auth::user()->outlets_id],
+        ])
+        ->whereDate('created_at', Carbon::today())
+        ->get();
         $namaKasir = Auth::user()->name;
 
         return Inertia::render('POS', [
@@ -69,6 +76,7 @@ class DataPosController extends Controller
             'diskonThresholdByProduct' => $diskonThresholdByProduct,
             'kategoriDiskons' => $kategoriDiskons,
             'table' => $tables,
+            'dataOrder' => $DataOrder,
         ]);
     }
     public function store(Request $request) {

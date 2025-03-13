@@ -13,6 +13,7 @@
         diskonThresholdByProduct: Array,
         kategoriDiskons: Array,
         table: Array,
+        dataOrder: Array,
     })
     onMounted(() => {
         updateDateTime();
@@ -59,6 +60,7 @@
     const isChangeModalOpen = ref(false);
     const isCheckDiscountModalOpen = ref(false);
     const isTableModalOpen = ref(false);
+    const isTrackOrderOpen = ref(true);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -92,6 +94,14 @@
         }
         else {
             isGuestEditModalOpen.value = false;
+        }
+    }
+    const toggleTrackOrder = () => {
+        if (isTrackOrderOpen.value) {
+            isTrackOrderOpen.value = false;
+        }
+        else {
+            isTrackOrderOpen.value = true;
         }
     }
 
@@ -520,15 +530,6 @@
                 console.error("Gagal checkout:", errors);
             }
         });
-        // router.post('/confirm-order', { cart: cart.value });
-        // cart.value = [];
-        // paymentData.value = "Payment";
-        // orderType.value = "Dine In";
-        // guest.value = 0;
-        // tableData.value = '';
-        // isConfirmPayment = false;
-        // console.log('test checkout berhasil');
-        
     }
 
     const removeFromCart = (index) => {
@@ -609,6 +610,22 @@
         if (!value) return "0";
         return Number(value).toLocaleString('id-ID');
     };
+    const formattedOrders = computed(() =>
+        props.dataOrder.map(order => ({
+            id: order.order_id,
+            guest: order.guest,
+            order_type: order.order_type,
+            created_at: order.created_at
+            ? new Date(order.created_at).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+                })
+            : ''
+        }))
+    );
+    console.log(formattedOrders);
+    
     const inputFormatCurrency = (event) => {
         let value = event.target.value.replace(/\D/g, "");
         value = Number(value).toLocaleString("id-ID");
@@ -769,6 +786,43 @@
                     </div>
                     <div v-if="!isProductAvailable" class="flex w-full h-64 rounded-xl overflow-hidden justify-center">
                         <h2 class="text-xl text-gray-400">No Product Available</h2>
+                    </div>
+                </div>
+                <!-- track order -->
+                <div class="fixed tracking-normal left-0 w-full h-24 bg-white shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] flex items-center justify-between px-4 transition-all duration-300 ease-in-out" :class="{ '-bottom-24': !isTrackOrderOpen, 'bottom-0': isTrackOrderOpen }">
+                    <div class="no-scrollbar flex flex-row w-full justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap">
+                        <div v-for="order in formattedOrders" :key="order.id" class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center">
+                            <div class="flex flex-row justify-between mb-1">
+                                <div class="text-md text-gray-800">{{ order.id}}</div>
+                                <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done</div>
+                            </div>
+                            <div class="flex flex-row justify-between">
+                                <div class="text-sm text-gray-400 mr-4">{{ order.guest }} Guests • {{ order.order_type}}</div>
+                                <div class="flex justify-center items-center text-sm text-gray-400">{{ order.created_at }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="isTrackOrderOpen" @click="(toggleTrackOrder)" class="cursor-pointer absolute -top-[2.976rem] left-4 bg-[#2D71F8] p-7 py-3 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
+                        <div class="flex flex-row w-full justify-between items-center">
+                            <div class="text-white text-base">
+                                Track Order
+                            </div>
+                            <div class="wrap px-2 flex flex-row items-center">
+                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> <i class="bi bi-plus text-current text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else @click=(toggleTrackOrder) class="cursor-pointer absolute -top-[3.24rem] left-4 bg-white p-7 py-4 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
+                        <div class="flex flex-row w-full justify-between items-center">
+                            <div class="text-[#2D71F8] text-base">
+                                Track Order
+                            </div>
+                            <div class="wrap px-2 flex flex-row items-center">
+                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> <i class="bi bi-dash text-current text-sm"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Modal -->

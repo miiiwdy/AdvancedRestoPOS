@@ -208,6 +208,18 @@
             isPaymentModalOpen.value = false;
             return;
         }
+        if (guest.value === 0) {
+            console.log('guest value masih kosong');
+            isPaymentModalOpen.value = false;
+            isGuestEditModalOpen.value = true
+            return;
+        }
+        if (orderType.value === 'Dine In' && tableData.value === '') {
+            console.log('tableData value masih kosong');
+            isPaymentModalOpen.value = false;
+            isTableModalOpen.value = true
+            return;
+        }
         if (cart.value.length === 0) {
             console.warn("cart lo kosong");
             isPaymentModalOpen.value = false;

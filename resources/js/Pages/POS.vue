@@ -71,7 +71,7 @@
     const isGuestEditModalOpen = ref(false);
     const isChangeModalOpen = ref(false);
     const isCheckDiscountModalOpen = ref(false);
-    const isTableModalOpen = ref(true);
+    const isTableModalOpen = ref(false);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -81,6 +81,7 @@
     const orderID = ref('');
     const orderType = ref('Dine In')
     const tableData = ref('');
+    const isTableActive = ref(true);
     const guest = ref(0);
     const paymentData = ref('Payment');
     const placeholderText = "Search something sweet on your mind here...";
@@ -94,7 +95,6 @@
     var isDeleting = false;
     var isConfirmPayment = false;
     var isConfirmTable = false;
-
 
     const toggleCart = () => {
         showCart.value = !showCart.value;
@@ -284,7 +284,14 @@
     }
 
     const getOrderType = () => {
-        orderType.value = orderType.value === 'Dine In' ? 'Take Away' : 'Dine In';
+        if (orderType.value = 'Dine In') {
+            orderType.value = 'Take Away';
+            isTableActive.value = false;
+        }
+        else if (orderType.value = 'Take Away') {
+            orderType.value = 'Dine In';
+            isTableActive.value = true;
+        }
     }
 
     const increaseQty = () => {
@@ -299,6 +306,7 @@
 
     const increaseExistQty = (item) => {
         if (isConfirmPayment) return;
+        if (isConfirmTable) return;
         const cartItem = cart.value.find(cartItem => cartItem.id_product === item.id_product); 
         if (cartItem) {
             cartItem.quantity++;
@@ -348,6 +356,7 @@
 
     const decreaseExistQty = (item) => {
         if (isConfirmPayment) return;
+        if (isConfirmTable) return;
         const cartItem = cart.value.find(cartItem => cartItem.id_product === item.id_product);
         if (cartItem && cartItem.quantity > 1) {
             cartItem.quantity--;
@@ -896,11 +905,14 @@
                         </div>
                     </div>
                     <div class="flex flex-row h-auto w-full px-3 pt-2 pb-3 justify-between items-center shadow-lg shadow-gray-100">
-                        <div @click="(openTableModal)" class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
+                        <div v-if="isTableActive" @click="(openTableModal)" class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
                             <div class="text-sm w-auto">Table {{ tableData.length > 0 ? tableData : '- - - -' }}</div>
                             <div class="icons flex items-center justify-center w-5 h-5 rounded-full bg-white">
                                 <i class="ri-arrow-left-s-fill"></i>
                             </div>
+                        </div>
+                        <div v-else class="flex flex-row w-[48.5%] font-[500] text-slate-400 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
+                            <div class="text-sm w-auto">Table - - - -</div>
                         </div>
                         <div @click=(getOrderType) class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
                             <div class="text-sm w-auto">{{ orderType }}</div>

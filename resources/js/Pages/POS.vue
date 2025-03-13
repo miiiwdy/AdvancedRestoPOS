@@ -284,13 +284,15 @@
     }
 
     const getOrderType = () => {
-        if (orderType.value = 'Dine In') {
+        if (orderType.value === 'Dine In') {
             orderType.value = 'Take Away';
             isTableActive.value = false;
+            console.log(orderType.value);
         }
-        else if (orderType.value = 'Take Away') {
+        else if (orderType.value === 'Take Away') {
             orderType.value = 'Dine In';
             isTableActive.value = true;
+            console.log(orderType.value);
         }
     }
 
@@ -469,6 +471,16 @@
             console.log('Keranjang kosong. Silakan tambahkan produk.');
             return;
         }
+        if (orderType.value === 'Dine In' && tableData.value === '') {
+            console.log('table blm di input');
+            return;
+        }
+        if (guest.value < 1) {
+            console.log('guest blm di input');
+            return;
+        }
+        console.log('test checkout berhasil');
+        
     }
 
     const removeFromCart = (index) => {
@@ -911,7 +923,7 @@
                                 <i class="ri-arrow-left-s-fill"></i>
                             </div>
                         </div>
-                        <div v-else class="flex flex-row w-[48.5%] font-[500] text-slate-400 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">
+                        <div v-else class="flex flex-row w-[48.5%] font-[500] text-slate-400 bg-gray-100 items-center justify-between rounded-full px-4 py-3">
                             <div class="text-sm w-auto">Table - - - -</div>
                         </div>
                         <div @click=(getOrderType) class="flex flex-row w-[48.5%] font-[500] text-slate-800 bg-gray-100 cursor-pointer items-center justify-between rounded-full px-4 py-3">

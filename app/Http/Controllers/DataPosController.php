@@ -104,7 +104,25 @@ class DataPosController extends Controller
             $totalHargaBeforeRounding += $item['tt_a'];
 
             LaporanOrderProduct::create([
-
+                'restos_id' => Auth::user()->restos_id,
+                'outlets_id' => Auth::user()->outlets_id,
+                'order_id' => $item['orderID'],
+                'nama_kasir' => Auth::user()->name,
+                'id_product' => $item['id_product'],
+                'nama_product' => $item['np'],
+                'kode_product' => $item['kode_product'],
+                'foto_product' => $item['foto_product'],
+                'kategori_id' => $item['kategori'],
+                'quantity' => $item['quantity'],
+                'harga_beli_per_item' => $item['hb'],
+                'total_harga_beli' => $item['thb'],
+                'harga_jual_per_item' => $item['hj'],
+                'total_harga_jual_before' => $item['tt_b'],
+                'total_harga_jual_after' => $item['tt_a'],
+                'total_pajak' => $item['total_pajak'],
+                'total_after_rounding' => $item['total_after_rounding'],
+                'note' => $item['note'],
+                'order_type' => $item['orderType'],
             ]);
         }
         $calculateKeuntungan = $totalHargaJual - $totalHargaBeli - $rounding;

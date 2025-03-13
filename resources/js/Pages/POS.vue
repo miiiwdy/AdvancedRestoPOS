@@ -291,7 +291,7 @@
         }
         else {
             return orderID.value;
-        }
+        }   
     }
 
     const getOrderType = () => {

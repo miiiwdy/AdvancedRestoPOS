@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('restos_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('outlets_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('order_id')->nullable();
-            $table->string('nama_kasir')->nullable();
-            $table->integer('total_pajak')->nullable();
+            $table->string('order_id');
+            $table->string('nama_kasir');
+            $table->decimal('total_pajak', 10,2);
             $table->timestamps();
         });
     }

@@ -502,6 +502,12 @@
             console.log('guest blm di input');
             return;
         }
+        cart.value = [];
+        paymentData.value = "Payment";
+        orderType.value = "Dine In";
+        guest.value = 0;
+        tableData.value = '';
+        isConfirmPayment = false;
         console.log('test checkout berhasil');
         
     }

@@ -808,7 +808,8 @@
                                 Track Order
                             </div>
                             <div class="wrap px-2 flex flex-row items-center">
-                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> <i class="bi bi-plus text-current text-lg"></i>
+                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> 
+                                    <i class="bi bi-dash text-current text-lg"></i>
                                 </div>
                             </div>
                         </div>
@@ -819,7 +820,8 @@
                                 Track Order
                             </div>
                             <div class="wrap px-2 flex flex-row items-center">
-                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> <i class="bi bi-dash text-current text-sm"></i>
+                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
+                                    <i class="bi bi-plus text-current text-sm"></i>
                                 </div>
                             </div>
                         </div>

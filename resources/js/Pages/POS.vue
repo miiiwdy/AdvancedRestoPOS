@@ -1,5 +1,5 @@
     <script setup>
-    import { router } from '@inertiajs/vue3';
+    import { router, usePage  } from '@inertiajs/vue3';
     import { ref, onMounted, computed, watch } from "vue";
     import FlashMessage from '@/Components/FlashMessage.vue';
 
@@ -14,7 +14,6 @@
         kategoriDiskons: Array,
         table: Array,
     })
-
     onMounted(() => {
         updateDateTime();
         setInterval(updateDateTime, 1000);
@@ -45,20 +44,6 @@
             cart.value.some(item => item.note === diskon.nama_diskon)
         );
     });
-
-
-    const getDiskonThresholdByProductData = computed(() => 
-        props.product.find(p => p.id === props.diskonThresholdByProduct.target_product_id) || null
-    );
-
-    const DTBP_kode_product = computed(() => getDiskonThresholdByProductData.value?.kode_product || "Tidak Ditemukan");
-    const DTBP_nama_product = computed(() => getDiskonThresholdByProductData.value?.nama_product || "Tidak Ditemukan");
-    const DTBP_deskripsi_product = computed(() => getDiskonThresholdByProductData.value?.deskripsi_product || "Tidak Ditemukan");
-    const DTBP_foto_product = computed(() => getDiskonThresholdByProductData.value?.foto_product || "Tidak Ditemukan");
-    const DTBP_kategori = computed(() => getDiskonThresholdByProductData.value?.kategoris_id || "Tidak Ditemukan");
-    const DTBP_harga_product = computed(() => getDiskonThresholdByProductData.value?.harga_product || "Tidak Ditemukan");
-    const DTBP_harga_beli_product = computed(() => getDiskonThresholdByProductData.value?.harga_beli_product || "Tidak Ditemukan");
-    const DTBP_id_product = computed(() => getDiskonThresholdByProductData.value?.id || "Tidak Ditemukan");
 
     const time = ref("");
     const period = ref("");
@@ -314,11 +299,20 @@
         if (orderType.value === 'Dine In') {
             orderType.value = 'Take Away';
             isTableActive.value = false;
+            cart.value.forEach(item => {
+                item.orderType = orderType.value;
+            });
+            if (isTableModalOpen) {
+                isTableModalOpen.value = false;
+            }
             console.log(orderType.value);
         }
         else if (orderType.value === 'Take Away') {
             orderType.value = 'Dine In';
             isTableActive.value = true;
+            cart.value.forEach(item => {
+                item.orderType = orderType.value;
+            });
             console.log(orderType.value);
         }
     }
@@ -684,7 +678,7 @@
 
     </style>
     <template>
-        <FlashMessage></FlashMessage>
+        <FlashMessage class="z-[100]"></FlashMessage>
         <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select">
             <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">

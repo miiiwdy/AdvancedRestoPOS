@@ -804,26 +804,26 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="isTrackOrderOpen" @click="(toggleTrackOrder)" class="cursor-pointer absolute -top-[2.976rem] left-4 bg-[#2D71F8] p-7 py-3 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
-                        <div class="flex flex-row w-full justify-between items-center">
-                            <div class="text-white text-base">
-                                Track Order
-                            </div>
-                            <div class="wrap px-2 flex flex-row items-center">
-                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> 
-                                    <i class="bi bi-dash text-current text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else @click=(toggleTrackOrder) class="cursor-pointer absolute -top-[3.24rem] left-4 bg-white p-7 py-4 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
+                    <div v-if="isTrackOrderOpen" @click=(toggleTrackOrder) class="cursor-pointer absolute -top-[3.24rem] left-4 bg-white p-7 py-4 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
                         <div class="flex flex-row w-full justify-between items-center">
                             <div class="text-[#2D71F8] text-base">
                                 Track Order
                             </div>
                             <div class="wrap px-2 flex flex-row items-center">
                                 <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
-                                    <i class="bi bi-plus text-current text-sm"></i>
+                                    <i class="bi bi-dash text-current text-sm"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else @click="(toggleTrackOrder)" class="cursor-pointer absolute -top-[2.976rem] left-4 bg-[#2D71F8] p-7 py-3 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
+                        <div class="flex flex-row w-full justify-between items-center">
+                            <div class="text-white text-base">
+                                Track Order
+                            </div>
+                            <div class="wrap px-2 flex flex-row items-center">
+                                <div class="icon w-6 h-6 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]"> 
+                                    <i class="bi bi-plus text-current text-lg"></i>
                                 </div>
                             </div>
                         </div>

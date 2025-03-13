@@ -610,22 +610,24 @@
         if (!value) return "0";
         return Number(value).toLocaleString('id-ID');
     };
-    const formattedOrders = computed(() =>
-        props.dataOrder.map(order => ({
-            id: order.order_id,
-            guest: order.guest,
-            order_type: order.order_type,
-            created_at: order.created_at
-            ? new Date(order.created_at).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-                })
-            : ''
-        }))
+    const formattedOrders = computed(() => 
+        props.dataOrder
+            .map(order => ({
+                ...order,
+                created_at: order.created_at
+                    ? new Date(order.created_at).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                    : ''
+            }))
+            .slice()
+            .reverse()
     );
-    console.log(formattedOrders);
-    
+
+    console.log(formattedOrders.value);
+
     const inputFormatCurrency = (event) => {
         let value = event.target.value.replace(/\D/g, "");
         value = Number(value).toLocaleString("id-ID");
@@ -793,7 +795,7 @@
                     <div class="no-scrollbar flex flex-row w-full justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap">
                         <div v-for="order in formattedOrders" :key="order.id" class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center">
                             <div class="flex flex-row justify-between mb-1">
-                                <div class="text-md text-gray-800">{{ order.id}}</div>
+                                <div class="text-md text-gray-800">{{ order.order_id}}</div>
                                 <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done</div>
                             </div>
                             <div class="flex flex-row justify-between">

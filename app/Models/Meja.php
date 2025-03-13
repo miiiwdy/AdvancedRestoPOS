@@ -11,8 +11,12 @@ class Meja extends Model
     protected $guarded = [
         'id',
     ];
-    public function kategoriMeja()
+    public function resto()
     {
-        return $this->belongsTo(KategoriMeja::class, 'kategori_mejas_id');
+        return $this->belongsTo(Resto::class);
+    }
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
     }
 }

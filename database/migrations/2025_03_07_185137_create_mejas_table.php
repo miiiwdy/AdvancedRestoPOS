@@ -13,13 +13,9 @@ return new class extends Migration
     {
         Schema::create('mejas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kategori_mejas_id')->nullable()->constrained('kategori_mejas')->onDelete('set null');
+            $table->foreignId('restos_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('outlets_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('nomor_meja')->nullable();
-            $table->string('guest')->nullable();
-            $table->time('time_used')->nullable();
-            $table->boolean('is_available')->nullable()->default(true);
-            $table->boolean('is_served')->nullable()->default(false);
-            $table->boolean('is_reserved')->nullable()->default(false); //tadi diubah ngapus '' didalem default
             $table->timestamps();
         });
     }

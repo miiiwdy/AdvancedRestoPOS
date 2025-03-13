@@ -241,7 +241,6 @@
         }
     };
 
-
     const decreaseExistQty = (item) => {
         if (isConfirmPayment) return;
         const cartItem = cart.value.find(cartItem => cartItem.id_product === item.id_product);
@@ -265,7 +264,6 @@
             }
         }
     };
-
 
     const closeCheckDiscountModal = () => {
         isCheckDiscountModalOpen.value = false;
@@ -358,39 +356,6 @@
                 alert('produk sudah ada di keranjang')
                 return;
             }
-
-            // if (selectedProduct.value.id === props.diskonThresholdByProduct.product_id && quantity.value >= props.diskonThresholdByProduct.minimum_items_count) {
-            //     // const totalHargaBeliDTBP = DTBP_harga_beli_product.value * props.diskonThresholdByProduct.target_product_quantity;
-            //     // const totalHargaJualDTBP = DTBP_harga_product.value * props.diskonThresholdByProduct.target_product_quantity;
-            //     // const totalPajakDTBP = totalHargaJualDTBP * (props.pajak / 100);
-            //     // const totalHargaAfterDTBP = totalHargaJualDTBP + totalPajakDTBP;
-            //     cart.value.unshift({
-            //         np: DTBP_nama_product.value,
-            //         kode_product: DTBP_kode_product.value,
-            //         deskripsi_product: DTBP_deskripsi_product.value,
-            //         foto_product: DTBP_foto_product.value,
-            //         kategori: DTBP_kategori.value,
-            //         quantity: props.diskonThresholdByProduct.target_product_quantity,
-            //         hb: 0,
-            //         thb: 0,
-            //         hj: 0,
-            //         tt_b: 0,
-            //         tt_a: 0,
-            //         total_pajak: 0,
-            //         note: props.diskonThresholdByProduct.nama_diskon,
-            //         payment: paymentData.value,
-            //         rounding: rounding.value,
-            //         total_after_rounding: totalAfterRounding.value,
-            //         amount_paid: amountPaid.value,
-            //         change: change.value,
-            //         orderID: createorderID(),
-            //         guest: guest.value || '',
-            //         orderType: orderType.value,
-            //         id_product: DTBP_id_product,
-            //     })
-            //     console.log('Nambah barang baru cuy, Diskon terpakai!');
-                
-            // }
             const applicableDiscounts = props.diskonThresholdByProduct.filter(
                 (diskon) =>
                     selectedProduct.value.id === diskon.product_id &&
@@ -474,28 +439,39 @@
         }
         if (isConfirmPayment) return;
 
-        //kayanya ga perlu
-        // if (cart.value.length === 1) {
-        //     orderID.value === ''
-        // }
         if (cart.value.length > 0) {
             isCooldown = true;
             const removedItem = cart.value.splice(index, 1)[0];
+
+            console.log('product dihapus:', removedItem);
+            for (let i = cart.value.length - 1; i >= 0; i--) {
+                if (
+                    cart.value[i].note && 
+                    props.diskonThresholdByProduct.some(d => 
+                        d.product_id === removedItem.id_product && 
+                        cart.value[i].note === d.nama_diskon
+                    )
+                ) {
+                    console.log(`Menghapus diskon terkait: ${cart.value[i].note}`);
+                    cart.value.splice(i, 1);
+                }
+            }
+
             const totalHargaSebelumDiskonPajak = cart.value.reduce((total, item) => {
                 return total + item.tt_b;
             }, 0);
 
-            console.log('product dihapus:', removedItem);
             console.log('Total harga setelah penghapusan:', totalHargaSebelumDiskonPajak);
 
             setTimeout(() => {
                 isCooldown = false;
-                console.log('Cooldown selesai, Anda dapat menghapus product lagi.');
+                console.log('Cooldown selesai, Anda dapat menghapus produk lagi.');
             }, 1000);
         } else {
             console.log('Keranjang kosong, tidak ada yang bisa dihapus.');
         }
     };
+
 
     const filteredAndSortedProducts = computed(() => {
         if (!Array.isArray(props.product)) return [];
@@ -632,7 +608,7 @@
                             <i class="ri-restaurant-2-line text-xl text-current"></i>
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
-                            <div class="nama_kategori font-semibold text-lg text-gray-700">All Menu</div>
+                            <div class="nama_kategori font-semibold text-lg" :class="[activeMenu === 1337 ? 'text-[#2D71F8]' : 'text-gray-700']">All Menu</div>
                             <div class="total_product_in_kategori text-sm text-gray-500">{{ props.product.length }} items</div>
                         </div>
                     </div>  
@@ -641,7 +617,7 @@
                             <i class="text-xl text-current" :class="[kategori.icon]"></i>
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
-                            <div class="nama_kategori font-semibold text-lg text-gray-700">{{ kategori.nama_kategori}}</div>
+                            <div class="nama_kategori font-semibold text-lg" :class="[activeMenu === kategori.id ? 'text-[#2D71F8]' : 'text-gray-700']">{{ kategori.nama_kategori}}</div>
                             <div class="total_product_in_kategori text-sm text-gray-500">{{ getProductCount(kategori.id) }} items</div>
                         </div>
                     </div>
@@ -653,7 +629,7 @@
                         <i class="bi bi-search text-lg text-current"></i>
                     </div>
                 </div>
-                <div class="flex flex-wrap justify-center flex-row gap-[1.20rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
+                <div class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 py-4 mt-3 h-full pb-[15%] overflow-auto">
                     <div v-for="product in filteredAndSortedProducts" :key="product.id" @click="openModal(product)" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
                         <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
                             <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + product.foto_product" alt="">

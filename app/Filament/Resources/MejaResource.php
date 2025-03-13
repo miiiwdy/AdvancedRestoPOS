@@ -26,25 +26,8 @@ class MejaResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('kategori_mejas_id')
-                    ->label('Kategori Meja')
-                    ->required()
-                    ->searchable()
-                    ->getSearchResultsUsing(fn(string $search): array => KategoriMeja::where('nama_kategori_meja', 'like', "%{$search}%")
-                        ->limit(50)
-                        ->pluck('nama_kategori_meja', 'id')
-                        ->toArray())
-                    ->getOptionLabelUsing(fn($value): ?string => KategoriMeja::find($value)?->nama_kategori_meja)
-                    ->reactive(),
                 Forms\Components\TextInput::make('nomor_meja')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('guest')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('time_used'),
-                Forms\Components\Toggle::make('is_available')
-                ->default(true),
-                Forms\Components\Toggle::make('is_served'),
-                Forms\Components\Toggle::make('is_reserved'),
             ]);
     }
 
@@ -53,22 +36,8 @@ class MejaResource extends Resource
         return $table
             ->poll('5s')
             ->columns([
-                Tables\Columns\TextColumn::make('kategoriMeja.nama_kategori_meja')
-                    ->label('Kategori Meja')
-                    ->badge()
-                    ->color('success')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('nomor_meja')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('guest')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('time_used'),
-                Tables\Columns\IconColumn::make('is_available')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('is_served')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('is_reserved')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

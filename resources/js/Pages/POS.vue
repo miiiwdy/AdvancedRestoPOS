@@ -1,6 +1,8 @@
     <script setup>
+    import { router } from '@inertiajs/vue3';
     import { ref, onMounted, computed, watch } from "vue";
-    
+    import FlashMessage from '@/Components/FlashMessage.vue';
+
     const props = defineProps({
         product: Array,
         kategori: Array,
@@ -463,7 +465,7 @@
                 foto_product: selectedProduct.value.foto_product,
                 kategori: selectedProduct.value.kategoris_id,
                 quantity: quantity.value,
-                hb: selectedProduct.value.harga_beli_product,
+                hb: totalHargaBeliPerItem,
                 thb: totalHargaBeli,
                 hj: totalHargaPerItem,
                 tt_b: totalHargaBefore,
@@ -509,13 +511,29 @@
             isPaymentModalOpen.value = true;
             return;
         }
-        cart.value = [];
-        paymentData.value = "Payment";
-        orderType.value = "Dine In";
-        guest.value = 0;
-        tableData.value = '';
-        isConfirmPayment = false;
-        console.log('test checkout berhasil');
+        router.post('/confirm-order', { cart: cart.value }, {
+            onSuccess: () => {
+                console.log('Checkout berhasil');
+                cart.value = [];
+                paymentData.value = "Payment";
+                orderType.value = "Dine In";
+                orderID.value = '';
+                guest.value = 0;
+                tableData.value = '';
+                isConfirmPayment = false;
+            },
+            onError: (errors) => {
+                console.error("Gagal checkout:", errors);
+            }
+        });
+        // router.post('/confirm-order', { cart: cart.value });
+        // cart.value = [];
+        // paymentData.value = "Payment";
+        // orderType.value = "Dine In";
+        // guest.value = 0;
+        // tableData.value = '';
+        // isConfirmPayment = false;
+        // console.log('test checkout berhasil');
         
     }
 
@@ -666,8 +684,8 @@
 
     </style>
     <template>
+        <FlashMessage></FlashMessage>
         <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select">
-            <!-- kiri -->
             <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
                     <div class="flex gap-4">

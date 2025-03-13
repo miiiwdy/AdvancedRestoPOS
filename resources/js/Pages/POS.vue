@@ -792,7 +792,7 @@
                 </div>
                 <!-- track order -->
                 <div class="fixed tracking-normal left-0 w-full h-24 bg-white shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] flex items-center justify-between px-4 transition-all duration-300 ease-in-out" :class="{ '-bottom-24': !isTrackOrderOpen, 'bottom-0': isTrackOrderOpen }">
-                    <div class="no-scrollbar flex flex-row w-full justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap">
+                    <div class="no-scrollbar flex flex-row w-[76%] justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap">
                         <div v-for="order in formattedOrders" :key="order.id" class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center">
                             <div class="flex flex-row justify-between mb-1">
                                 <div class="text-md text-gray-800">{{ order.order_id}}</div>

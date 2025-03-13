@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DataOrder;
 use App\Models\DiskonThresholdByOrder;
 use App\Models\DiskonThresholdByProduct;
 use App\Models\Kategori;
 use App\Models\KategoriDiskon;
+use App\Models\LaporanOrder;
+use App\Models\LaporanOrderProduct;
+use App\Models\LaporanPajak;
 use App\Models\Meja;
 use App\Models\Pajak;
 use App\Models\Payment;
@@ -90,20 +92,24 @@ class DataPosController extends Controller
         $totalHargaJual = 0;
         $totalPajak = 0;
         $totalHargaBeforeRounding = 0;
+        $rounding = $request->cart[0]['rounding'];
+        if ($rounding < 0) {
+            $rounding = 0;
+        }
         
         foreach ($request->cart as $item) {
             $totalHargaBeli += $item['thb'];
             $totalHargaJual += $item['tt_b'];
             $totalPajak += $item['total_pajak'];
             $totalHargaBeforeRounding += $item['tt_a'];
-        }
-        $rounding = $request->cart[0]['rounding'];
-        if ($rounding < 0) {
-            $rounding = 0;
+
+            LaporanOrderProduct::create([
+
+            ]);
         }
         $calculateKeuntungan = $totalHargaJual - $totalHargaBeli - $rounding;
 
-        DataOrder::create([
+        LaporanOrder::create([
             'restos_id' => Auth::user()->restos_id,
             'outlets_id' => Auth::user()->outlets_id,
             'order_id' => $request->cart[0]['orderID'],
@@ -121,6 +127,14 @@ class DataPosController extends Controller
             'total_pajak' => $totalPajak,
             'keuntungan' => $calculateKeuntungan,
         ]);
+        LaporanPajak::create([
+            'restos_id' => Auth::user()->restos_id,
+            'outlets_id' => Auth::user()->outlets_id,
+            'order_id' => $request->cart[0]['orderID'],
+            'nama_kasir' => Auth::user()->name,
+            'total_pajak' => $totalPajak,
+        ]);
+
         return redirect()->back()->with('type', 'success')->with('message', 'Order selesai.');
     }
 }

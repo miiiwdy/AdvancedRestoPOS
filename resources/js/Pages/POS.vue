@@ -1,5 +1,5 @@
     <script setup>
-    import { router, usePage  } from '@inertiajs/vue3';
+    import { router } from '@inertiajs/vue3';
     import { ref, onMounted, computed, watch } from "vue";
     import FlashMessage from '@/Components/FlashMessage.vue';
 
@@ -13,7 +13,9 @@
         diskonThresholdByProduct: Array,
         kategoriDiskons: Array,
         table: Array,
+        trackOrder: Array,
         dataOrder: Array,
+        dataOrderProduct: Array,
     })
     onMounted(() => {
         updateDateTime();
@@ -69,7 +71,9 @@
     const isChangeModalOpen = ref(false);
     const isCheckDiscountModalOpen = ref(false);
     const isTableModalOpen = ref(false);
+    const isTrackOrderModalOpen = ref(false);
     const isTrackOrderOpen = ref(true);
+    const selectedOrder = ref(null);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
@@ -96,10 +100,11 @@
     var index = 0;
     var isDeleting = false;
     var isConfirmPayment = false;
-
+ 
     const toggleCart = () => {
         showCart.value = !showCart.value;
     };
+
     const toggleGuest = () => {
         if (isConfirmPayment) return;
         if (!isGuestEditModalOpen.value) {
@@ -109,6 +114,7 @@
             isGuestEditModalOpen.value = false;
         }
     }
+
     const toggleTrackOrder = () => {
         if (isTrackOrderOpen.value) {
             isTrackOrderOpen.value = false;
@@ -117,6 +123,37 @@
             isTrackOrderOpen.value = true;
         }
     }
+
+    const formattedDataOrderUpdatedAt = computed(() => {
+        if (!selectedOrder.value?.updated_at) return "";
+        const date = new Date(selectedOrder.value.updated_at);
+        return new Intl.DateTimeFormat("en-EN", {
+            weekday: "short",
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(date);
+    });
+
+    const openTrackOrderModal = (order) => {
+        selectedOrder.value = order;
+        isTrackOrderModalOpen.value = true;
+    };
+
+    const closeTrackOrderModal = () => {
+        isTrackOrderModalOpen.value = false;
+        selectedOrder.value = null;
+    };
+
+    const selectedProducts = computed(() => {
+        if (!selectedOrder.value) return [];
+            return props.dataOrderProduct.filter((product) => product.order_id === selectedOrder.value.order_id
+        );
+    });
 
     const storeGuest = () => {
         if (guest.value === 0) {
@@ -128,6 +165,7 @@
             });
         isGuestEditModalOpen.value = false;
     }
+
     const openModal = (product) => {
         if (isConfirmPayment) return;
         selectedProduct.value = product;
@@ -146,6 +184,7 @@
         note.value = '';
         quantity.value = 1;
     };
+
     const openCartNoteModal = (item) => {
         if (isConfirmPayment) return;
         if (isCartNoteModalOpen.value && selectedCartProduct.value === item) {
@@ -609,17 +648,12 @@
 
     const filteredAndSortedTables = computed(() => {
         if (!Array.isArray(props.table)) return [];
-
         const query = searchQueryTables.value.toLowerCase();
         const filtered = props.table.filter(table => {
             const matchesSearch = table.nomor_meja.toLowerCase().includes(query);
             return matchesSearch;
         });
         return filtered;
-    });
-
-    const isProductAvailable = computed(() => {
-        return searchQuery.value === '' || filteredAndSortedProducts.value.length > 0;
     });
 
     const toggleActive = (categoryId) => {
@@ -630,7 +664,7 @@
         return Number(value).toLocaleString('id-ID');
     };
     const formattedOrders = computed(() => 
-        props.dataOrder
+        props.trackOrder
             .map(order => ({
                 ...order,
                 created_at: order.created_at
@@ -659,7 +693,6 @@
             loadMoreProducts();
         }
     };
-    
 
     const inputFormatCurrency = (event) => {
         let value = event.target.value.replace(/\D/g, "");
@@ -824,16 +857,16 @@
                 </div>
                 <!-- track order -->
                 <div class="fixed tracking-normal left-0 w-full h-24 bg-white shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] flex items-center justify-between px-4 transition-all duration-300 ease-in-out" :class="{ '-bottom-24': !isTrackOrderOpen, 'bottom-0': isTrackOrderOpen }">
-                    <div id="order-list" class="no-scrollbar flex flex-row w-[76%] justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap" >
-                        <div v-for="order in visibleOrders" :key="order.id" class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center">
-                        <div class="flex flex-row justify-between mb-1">
-                            <div class="text-md text-gray-800">{{ order.order_id }}</div>
-                            <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done </div>
-                        </div>
-                        <div class="flex flex-row justify-between">
-                            <div class="text-sm text-gray-400 mr-4"> {{ order.guest }} Guests • {{ order.order_type }} </div>
-                            <div class="flex justify-center items-center text-sm text-gray-400"> {{ order.created_at }}</div>
-                        </div>
+                    <div id="order-list" class="no-scrollbar flex flex-row w-[76%] justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap">
+                        <div v-for="order in visibleOrders":key="order.order_id"class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center"@click="openTrackOrderModal(order)">
+                            <div class="flex flex-row justify-between mb-1">
+                                <div class="text-md text-gray-800">#{{ order.order_id }}</div>
+                                <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done</div>
+                            </div>
+                            <div class="flex flex-row justify-between">
+                                <div class="text-sm text-gray-400 mr-4">{{ order.guest }} Guests • {{ order.order_type }}</div>
+                                <div class="flex justify-center items-center text-sm text-gray-400">{{ order.created_at }}</div>
+                            </div>
                         </div>
                     </div>
                     <div v-if="isTrackOrderOpen" @click=(toggleTrackOrder) class="cursor-pointer absolute -top-[3.24rem] left-4 bg-white p-7 py-4 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
@@ -861,7 +894,59 @@
                         </div>
                     </div>
                 </div>
-                <!-- Modal -->
+                <!-- track order Modal -->
+                <div v-if="isTrackOrderModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50"@click.self="closeTrackOrderModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[11rem] -translate-y-1/2 bg-white rounded-2xl w-[35rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                                <div class="flex flex-col justify-center items-center">
+                                    <h2 class="text-normal font-normal">Track Order</h2>
+                                </div>
+                                <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeTrackOrderModal">
+                                    <i class="bi bi-x-lg text-current"></i>
+                                </div>
+                            </div>
+                            <div class="flex w-full flex-col max-h-[34rem] overflow-auto mb-5">
+                                <div class="flex flex-col w-full h-50 py-4 mb-1 px-5 justify-between">
+                                    <div class="flex flex-row justify-left items-center w-full h-auto mb-2">
+                                    <div class="text-xl italic font-medium mr-11 text-gray-800">#{{ selectedOrder?.order_id }}</div>
+                                    <div class="flex justify-center items-center bg-[#ebfff5] text-sm text-[#1C8370] rounded-full py-[0.100rem] px-4">All Done</div>
+                                </div>
+                                <div class="flex flex-row w-auto pb-4 border-b-2 border-dashed text-gray-500">
+                                    <div class="flex flex-col mr-8 w-auto">
+                                        <div class="text-[0.920rem]">Table: {{ selectedOrder?.tables }}</div>
+                                        <div class="text-[0.920rem]">Guest: {{ selectedOrder?.guest }} Guests</div>
+                                    </div>
+                                    <div class="flex flex-col mr-8 w-auto">
+                                        <div class="text-[0.920rem]">Order type: {{ selectedOrder?.order_type }}</div>
+                                        <div class="text-[0.920rem]">Cashier: {{ selectedOrder?.nama_kasir }}</div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <div class="text-[0.920rem]">Date Order:</div>
+                                        <div class="flex justify-center items-start text-[0.920rem]">{{ formattedDataOrderUpdatedAt }}</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col justify-start items-start text-gray-500 w-full h-auto pt-3 pb-4 border-dashed border-b-2">
+                                    <div class="text-[0.920rem]">Total Price: Rp{{ formatCurrency(selectedOrder?.total_harga_after_all) }}</div>
+                                    <div class="text-[0.920rem]">Rounding: {{ selectedOrder?.rounding }}</div>
+                                    <div class="text-[0.920rem]">Amount Paid: Rp{{ formatCurrency(selectedOrder?.amount_paid) }}</div>
+                                    <div class="text-[0.920rem]">Change: Rp{{ formatCurrency(selectedOrder?.change) }}</div>
+                                </div>
+                            </div>
+                            <div class="flex w-full h-auto flex-col">
+                                <div class="flex flex-col max-h-40 w-full mb-4 pb-2 overflow-y-auto shadow-lg shadow-gray-100 rounded-md">
+                                    <div v-for="product in selectedProducts" :key="product.id" class="text-[0.940rem] text-gray-500 px-5 mb-2">
+                                        <span class="mr-3">{{ product.quantity }}x</span>{{ product.nama_product }}
+                                    </div>
+                                </div>
+                                <div class="px-5 text-[0.940rem] text-gray-500 flex items-center">
+                                    <span class="mr-3">Total Order:</span>{{ selectedProducts.length }} Items
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- product Modal -->
                 <div v-if="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closeModal">
                     <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[26rem] shadow-2xl">
                         <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">

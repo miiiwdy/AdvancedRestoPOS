@@ -58,12 +58,20 @@ class DataPosController extends Controller
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
         ])->get();
-        $DataOrder = LaporanOrder::where([
+        $trackOrderData = LaporanOrder::where([
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
         ])
         ->whereDate('created_at', Carbon::today())
         ->get();
+        $dataOrder = LaporanOrder::where([
+            ['restos_id', '=', Auth::user()->restos_id],
+            ['outlets_id', '=', Auth::user()->outlets_id],
+        ])->get();
+        $dataOrderProduct = LaporanOrderProduct::where([
+            ['restos_id', '=', Auth::user()->restos_id],
+            ['outlets_id', '=', Auth::user()->outlets_id],
+        ])->get();
         $namaKasir = Auth::user()->name;
 
         return Inertia::render('POS', [
@@ -76,7 +84,9 @@ class DataPosController extends Controller
             'diskonThresholdByProduct' => $diskonThresholdByProduct,
             'kategoriDiskons' => $kategoriDiskons,
             'table' => $tables,
-            'dataOrder' => $DataOrder,
+            'trackOrder' => $trackOrderData,
+            'dataOrder' => $dataOrder,
+            'dataOrderProduct' => $dataOrderProduct,
         ]);
     }
     public function store(Request $request) {

@@ -175,15 +175,19 @@
                 item.change = changeData;
             });
             console.log('kembalian');
-            amountPaid.value = "";
+            amountPaid.value = 0;
             isAmountPaidModalOpen.value = false;
             isChangeModalOpen.value = true;
         } 
         else if (totalRounding() === amountPaidNumber) {
-            console.log('pas');
             cart.value.forEach(item => {
-                item.amount_paid = 0;
+                item.amount_paid = amountPaidNumber;
             });
+            console.log('pas');
+            amountPaid.value = 0;
+            isAmountPaidModalOpen.value = false;
+            console.log(cart);
+            
         } 
         else {
             console.warn('uangnya kurang');
@@ -542,7 +546,6 @@
         if (cart.value.length > 0) {
             isCooldown = true;
             const removedItem = cart.value.splice(index, 1)[0];
-
             console.log('product dihapus:', removedItem);
             for (let i = cart.value.length - 1; i >= 0; i--) {
                 if (
@@ -575,7 +578,6 @@
 
     const filteredAndSortedProducts = computed(() => {
         if (!Array.isArray(props.product)) return [];
-
         const query = searchQuery.value.toLowerCase();
         const filtered = props.product.filter(product => {
             const matchesSearch = product.nama_product.toLowerCase().includes(query);
@@ -622,7 +624,7 @@
                     })
                     : ''
             }))
-            .slice()
+            // .slice()
             .reverse()
     );
 

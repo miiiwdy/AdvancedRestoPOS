@@ -19,6 +19,15 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
         typeEffect();
+        const orderList = document.getElementById("order-list");
+        if (orderList) {
+            orderList.addEventListener("scroll", onScroll);
+        }
+
+        const productList = document.getElementById("product-list");
+        if (productList) {
+            productList.addEventListener("scroll", onScroll);
+        }
     });
 
     const allActiveDiscounts = computed(() => {
@@ -79,6 +88,10 @@
     const totalAfterRounding = ref(0);
     const amountPaid = ref(0);
     const change = ref(0);
+    const ordersPerPage = 10;
+    const loadedOrders = ref(ordersPerPage);
+    const productsPerPage = 20;
+    const loadedProducts = ref(productsPerPage);
     var isCooldown = false;
     var index = 0;
     var isDeleting = false;
@@ -576,10 +589,10 @@
     };
 
 
-    const filteredAndSortedProducts = computed(() => {
+    const filteredProducts = computed(() => {
         if (!Array.isArray(props.product)) return [];
         const query = searchQuery.value.toLowerCase();
-        const filtered = props.product.filter(product => {
+        return props.product.filter(product => {
             const matchesSearch = product.nama_product.toLowerCase().includes(query);
             if (activeMenu.value === 1337) {
                 return matchesSearch;
@@ -587,8 +600,12 @@
             const matchesCategory = activeMenu.value ? product.kategoris_id === activeMenu.value : true;
             return matchesSearch && matchesCategory;
         });
-        return filtered;
     });
+    const visibleProducts = computed(() => filteredProducts.value.slice(0, loadedProducts.value));
+
+    const loadMoreProducts = () => {
+        loadedProducts.value += productsPerPage;
+    };
 
     const filteredAndSortedTables = computed(() => {
         if (!Array.isArray(props.table)) return [];
@@ -624,11 +641,25 @@
                     })
                     : ''
             }))
-            // .slice()
+            .slice()
             .reverse()
     );
+    const visibleOrders = computed(() => formattedOrders.value.slice(0, loadedOrders.value));
 
-    console.log(formattedOrders.value);
+    const loadMoreOrders = () => {
+        loadedOrders.value += ordersPerPage;
+    };
+
+    const onScroll = (event) => {
+        const { scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth } = event.target;
+        if (event.target.id === "order-list" && scrollLeft + clientWidth >= scrollWidth - 10) {
+            loadMoreOrders();
+        }
+        if (event.target.id === "product-list" && scrollTop + clientHeight >= scrollHeight - 10) {
+            loadMoreProducts();
+        }
+    };
+    
 
     const inputFormatCurrency = (event) => {
         let value = event.target.value.replace(/\D/g, "");
@@ -770,40 +801,39 @@
                     </div>
                     <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" :placeholder="displayPlaceholder"/>
                 </div>
-
-                <div class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 mt-5 h-full pb-[15%] overflow-auto">
-                    <div v-for="product in filteredAndSortedProducts" :key="product.id" @click="openModal(product)" class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
-                        <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
-                            <img class="max-h-32 w-auto object-contain" :src="'http://127.0.0.1:8000/storage/' + product.foto_product" alt="">
+                <div id="product-list" class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 mt-5 h-full pb-[15%] overflow-auto">
+                    <div v-for="product in visibleProducts":key="product.id" @click="openModal(product)"class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
+                    <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
+                        <img class="max-h-32 w-auto object-contain":src="'http://127.0.0.1:8000/storage/' + product.foto_product"alt=""/>
+                    </div>
+                    <div class="nama_product text-medium font-semibold text-gray-700 pt-2 text-left">
+                        {{ product.nama_product }}
+                    </div>
+                    <div class="flex flex-row w-full justify-between items-center mt-auto">
+                        <div class="kategori flex items-center justify-center px-2 py-0.5 rounded-xl w-fit text-xs font-semibold":style="{ backgroundColor: product.kategori?.warna_background_kategori, color: product.kategori?.warna_teks_kategori }">
+                        {{ product.kategori?.nama_kategori }}
                         </div>
-                        <div class="nama_product text-medium font-semibold text-gray-700 pt-2 text-left">
-                            {{ product.nama_product }}
-                        </div>
-                        <div class="flex flex-row w-full justify-between items-center mt-auto">
-                            <div class="kategori flex items-center justify-center px-2 py-0.5 rounded-xl w-fit text-xs font-semibold" :style="{ backgroundColor: product.kategori?.warna_background_kategori, color: product.kategori?.warna_teks_kategori}">
-                                {{product.kategori?.nama_kategori}}
-                            </div>
-                            <div class="harga text-gray-700 font-semibold text-lg">
-                                Rp{{ formatCurrency(product.harga_product) }}
-                            </div>
+                        <div class="harga text-gray-700 font-semibold text-lg">
+                        Rp{{ formatCurrency(product.harga_product) }}
                         </div>
                     </div>
-                    <div v-if="!isProductAvailable" class="flex w-full h-64 rounded-xl overflow-hidden justify-center">
-                        <h2 class="text-xl text-gray-400">No Product Available</h2>
+                    </div>
+                    <div v-if="visibleProducts.length === 0" class="flex w-full h-64 rounded-xl overflow-hidden justify-center">
+                    <h2 class="text-xl text-gray-400">No Product Available</h2>
                     </div>
                 </div>
                 <!-- track order -->
                 <div class="fixed tracking-normal left-0 w-full h-24 bg-white shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] flex items-center justify-between px-4 transition-all duration-300 ease-in-out" :class="{ '-bottom-24': !isTrackOrderOpen, 'bottom-0': isTrackOrderOpen }">
-                    <div class="no-scrollbar flex flex-row w-[76%] justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap">
-                        <div v-for="order in formattedOrders" :key="order.id" class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center">
-                            <div class="flex flex-row justify-between mb-1">
-                                <div class="text-md text-gray-800">{{ order.order_id}}</div>
-                                <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done</div>
-                            </div>
-                            <div class="flex flex-row justify-between">
-                                <div class="text-sm text-gray-400 mr-4">{{ order.guest }} Guests • {{ order.order_type}}</div>
-                                <div class="flex justify-center items-center text-sm text-gray-400">{{ order.created_at }}</div>
-                            </div>
+                    <div id="order-list" class="no-scrollbar flex flex-row w-[76%] justify-start items-center gap-3 h-24 overflow-x-auto whitespace-nowrap" >
+                        <div v-for="order in visibleOrders" :key="order.id" class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center">
+                        <div class="flex flex-row justify-between mb-1">
+                            <div class="text-md text-gray-800">{{ order.order_id }}</div>
+                            <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done </div>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <div class="text-sm text-gray-400 mr-4"> {{ order.guest }} Guests • {{ order.order_type }} </div>
+                            <div class="flex justify-center items-center text-sm text-gray-400"> {{ order.created_at }}</div>
+                        </div>
                         </div>
                     </div>
                     <div v-if="isTrackOrderOpen" @click=(toggleTrackOrder) class="cursor-pointer absolute -top-[3.24rem] left-4 bg-white p-7 py-4 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">

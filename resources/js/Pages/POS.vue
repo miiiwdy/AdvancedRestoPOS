@@ -77,7 +77,7 @@
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
     const quantity = ref(1);
-    var note = ref('');
+    const note = ref('');
     const cart = ref([]);
     const showCart = ref(true);
     const orderID = ref('');
@@ -934,7 +934,7 @@
                                 </div>
                             </div>
                             <div class="flex w-full h-auto flex-col">
-                                <div class="flex flex-col max-h-40 w-full mb-4 pb-2 overflow-y-auto shadow-lg shadow-gray-100 rounded-md">
+                                <div class="flex flex-col max-h-40 w-full mb-4 pb-4 overflow-y-auto shadow-lg shadow-gray-100 rounded-md">
                                     <div v-for="product in selectedProducts" :key="product.id" class="text-[0.940rem] text-gray-500 px-5 mb-2">
                                         <span class="mr-3">{{ product.quantity }}x</span>{{ product.nama_product }}
                                     </div>

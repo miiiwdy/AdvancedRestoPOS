@@ -25,7 +25,6 @@
         if (orderList) {
             orderList.addEventListener("scroll", onScroll);
         }
-
         const productList = document.getElementById("product-list");
         if (productList) {
             productList.addEventListener("scroll", onScroll);
@@ -254,6 +253,7 @@
     const closeCheckDiscountModal = () => {
         isCheckDiscountModalOpen.value = false;
     };
+
     const openCheckDiscountModal = () => {
         !isCheckDiscountModalOpen.value ? isCheckDiscountModalOpen.value = true : isCheckDiscountModalOpen.value = false;
     };
@@ -261,6 +261,7 @@
     const closePaymentModal = () => {
         isPaymentModalOpen.value = false;
     };
+    
     const openPaymentModal = () => {
         if(isConfirmPayment) return;
         !isPaymentModalOpen.value ? isPaymentModalOpen.value = true : isPaymentModalOpen.value = false;
@@ -868,6 +869,7 @@
                                 <div class="flex justify-center items-center text-sm text-gray-400">{{ order.created_at }}</div>
                             </div>
                         </div>
+                        <div v-if="visibleOrders.length === 0" class="flex pl-3 text-gray-400">No Order Data Available Today</div>
                     </div>
                     <div v-if="isTrackOrderOpen" @click=(toggleTrackOrder) class="cursor-pointer absolute -top-[3.24rem] left-4 bg-white p-7 py-4 rounded-t-2xl shadow-[0px_-10px_20px_2px_rgba(193,195,199,0.2)] ">
                         <div class="flex flex-row w-full justify-between items-center">

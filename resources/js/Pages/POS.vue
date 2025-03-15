@@ -49,11 +49,15 @@
         );
     });
 
-
     const usedDiscounts = computed(() => {
-        return allActiveDiscounts.value.filter(diskon => 
-            cart.value.some(item => item.note === diskon.nama_diskon)
+        const filtered = allActiveDiscounts.value.filter(diskon => 
+            cart.value
+                .filter(item => item.note && item.note.trim() !== "")
+                .some(item => {
+                    return item.note.trim().toLowerCase() === diskon.nama_diskon.trim().toLowerCase();
+                })
         );
+        return filtered;
     });
 
     const time = ref("");
@@ -1156,8 +1160,17 @@
                             <div v-for="diskon in allActiveDiscounts" :key="diskon.id">
                                 <div class="flex flex-row w-full h-auto mt-4 rounded-2xl bg-gray-100 justify-start items-center">
                                     <div class="flex w-[25%] h-auto items-center justify-center border-r-2 border-gray-200">
-                                        <div class="flex items-center justify-center rounded-full p-2" :class="{'bg-[#d4ffea]': usedDiscounts.some(d => d.id === diskon.id), 'bg-rose-200': !usedDiscounts.some(d => d.id === diskon.id)}">
-                                            <div class="p-4 rounded-full" :class="{'bg-[#1C8370]': usedDiscounts.some(d => d.id === diskon.id), 'bg-[#FC4A4A]': !usedDiscounts.some(d => d.id === diskon.id)}"></div>
+                                        <div class="flex items-center justify-center rounded-full p-2"
+                                            :class="{
+                                                'bg-[#d4ffea]': usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon), 
+                                                'bg-rose-200': !usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon)
+                                            }">
+                                            <div class="p-4 rounded-full" 
+                                                :class="{
+                                                    'bg-[#1C8370]': usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon), 
+                                                    'bg-[#FC4A4A]': !usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon)
+                                                }">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="flex w-full h-full flex-col px-5 items-start justify-center py-7">

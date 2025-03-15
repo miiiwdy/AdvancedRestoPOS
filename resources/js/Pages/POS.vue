@@ -404,28 +404,38 @@
             cartItem.tt_a = cartItem.tt_b + cartItem.total_pajak;
             console.log(cart);
 
-            const applicableDiscountProduct2 = props.diskonThresholdByProduct.filter((diskon) =>
-                cartItem.id_product === diskon.product_id &&
-                cartItem.quantity === diskon.minimum_items_count
+            const increaseApplicableDiscountProduct = props.diskonThresholdByProduct.filter((diskonProduct) =>
+                cartItem.id_product === diskonProduct.product_id &&
+                cartItem.quantity === diskonProduct.minimum_items_count
             );
-            const isBonusExist = cart.value.some(c => c.note === props.diskonThresholdByProduct.nama_diskon);
-            if (!isBonusExist) {
-            applicableDiscountProduct2.forEach((diskon) => {
-                const relatedProduct2 = props.product.find(p => p.id === diskon.target_product_id) || {};
+
+            const isDiskonOrderExist = cart.value.some(c => 
+                props.diskonThresholdByOrder.some(diskon => c.note === diskon.nama_diskon)
+            );
+
+            const isDiskonProductExist = cart.value.some(c => c.note === props.diskonThresholdByProduct.nama_diskon);
+            
+            if (!isDiskonOrderExist) {
+                runDiskonByOrderValidation();
+            }
+
+            if (!isDiskonProductExist) {
+            increaseApplicableDiscountProduct.forEach((diskonProduct) => {
+                const relatedDiskonProductItem = props.product.find(p => p.id === diskonProduct.target_product_id) || {};
                 cart.value.unshift({
-                    np: relatedProduct2.nama_product || "Tidak Ditemukan",
-                    kode_product: relatedProduct2.kode_product || "Tidak Ditemukan",
-                    deskripsi_product: relatedProduct2.deskripsi_product || "Tidak Ditemukan",
-                    foto_product: relatedProduct2.foto_product || "Tidak Ditemukan",
-                    kategori: relatedProduct2.kategoris_id || "Tidak Ditemukan",
-                    quantity: diskon.target_product_quantity,
-                    hb: relatedProduct2.harga_beli_product || 0,
+                    np: relatedDiskonProductItem.nama_product || "Tidak Ditemukan",
+                    kode_product: relatedDiskonProductItem.kode_product || "Tidak Ditemukan",
+                    deskripsi_product: relatedDiskonProductItem.deskripsi_product || "Tidak Ditemukan",
+                    foto_product: relatedDiskonProductItem.foto_product || "Tidak Ditemukan",
+                    kategori: relatedDiskonProductItem.kategoris_id || "Tidak Ditemukan",
+                    quantity: diskonProduct.target_product_quantity,
+                    hb: relatedDiskonProductItem.harga_beli_product || 0,
                     thb: 0,
-                    hj: relatedProduct2.harga_product || 0,
+                    hj: relatedDiskonProductItem.harga_product || 0,
                     tt_b: 0,
                     tt_a: 0,
                     total_pajak: 0,
-                    note: diskon.nama_diskon,
+                    note: diskonProduct.nama_diskon,
                     payment: paymentData.value,
                     rounding: rounding.value,
                     total_after_rounding: totalAfterRounding.value,
@@ -436,10 +446,10 @@
                     orderType: orderType.value,
                     table: tableData.value,
                     is_product_diskon: true,
-                    id_product: relatedProduct2.id || "Tidak Ditemukan",
+                    id_product: relatedDiskonProductItem.id || "Tidak Ditemukan",
                 });
             });
-            console.log("Diskon yang diterapkan:", applicableDiscountProduct2);
+            console.log("Diskon yang diterapkan:", increaseApplicableDiscountProduct);
             }
         }
     };
@@ -452,17 +462,29 @@
             cartItem.tt_b = cartItem.hj * cartItem.quantity;
             cartItem.total_pajak = cartItem.tt_b * (props.pajak / 100);
             cartItem.tt_a = cartItem.tt_b + cartItem.total_pajak;
-            const applicableDiscountProduct3 = props.diskonThresholdByProduct.filter(
-                (diskon) => cartItem.id_product === diskon.product_id && cartItem.quantity < diskon.minimum_items_count
+            const decreaseApplicableDiscountProduct = props.diskonThresholdByProduct.filter(
+                (diskonProduct) => cartItem.id_product === diskonProduct.product_id && cartItem.quantity < diskonProduct.minimum_items_count
             );
-            if (applicableDiscountProduct3.length > 0) {
+            const decreaseApplicableDiscountOrder = props.diskonThresholdByOrder.filter(
+                (diskonOrder) => calculateSubtotal() < diskonOrder.minimum_order_amount
+            );
+            if (decreaseApplicableDiscountOrder.length > 0) {
                 for (let i = cart.value.length - 1; i >= 0; i--) {
-                    if (cart.value[i].note && applicableDiscountProduct3.some(d => cart.value[i].note === d.nama_diskon)) {
+                    if (cart.value[i].note && decreaseApplicableDiscountOrder.some(d => cart.value[i].note === d.nama_diskon)) {
                         cart.value.splice(i, 1);
                     }
                 }
                 console.log(`product diskon diaps`);
-            } else {
+            } 
+            if (decreaseApplicableDiscountProduct.length > 0) {
+                for (let i = cart.value.length - 1; i >= 0; i--) {
+                    if (cart.value[i].note && decreaseApplicableDiscountProduct.some(d => cart.value[i].note === d.nama_diskon)) {
+                        cart.value.splice(i, 1);
+                    }
+                }
+                console.log(`product diskon diaps`);
+            } 
+            else {
                 console.log(`gaada produk diskon yg diapus`);
             }
         }
@@ -554,37 +576,36 @@
     }
 
     const runDiskonByOrderValidation = () => {
-        console.log(calculateSubtotal());
         const applicableDiscountOrder = props.diskonThresholdByOrder.filter((diskonOrder) => calculateSubtotal() >= diskonOrder.minimum_order_amount);
         applicableDiscountOrder.forEach((diskonOrder) => {
-                const relatedProduct = props.product.find(p => p.id === diskonOrder.target_product_id) || {};
-                cart.value.unshift({
-                    np: relatedProduct.nama_product || "Tidak Ditemukan",
-                    kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
-                    deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
-                    foto_product: relatedProduct.foto_product || "Tidak Ditemukan",
-                    kategori: relatedProduct.kategoris_id || "Tidak Ditemukan",
-                    quantity: diskonOrder.target_product_quantity,
-                    hb: relatedProduct.harga_beli_product || 0,
-                    thb: 0,
-                    hj: relatedProduct.harga_product || 0,
-                    tt_b: 0,
-                    tt_a: 0,
-                    total_pajak: 0,
-                    note: diskonOrder.nama_diskon,
-                    payment: paymentData.value,
-                    rounding: rounding.value,
-                    total_after_rounding: totalAfterRounding.value,
-                    amount_paid: amountPaid.value,
-                    change: change.value,
-                    orderID: createorderID(),
-                    guest: guest.value || '',
-                    orderType: orderType.value,
-                    table: tableData.value,
-                    is_product_diskon: true,
-                    id_product: relatedProduct.id || "Tidak Ditemukan",
-                });
+            const relatedProduct = props.product.find(p => p.id === diskonOrder.target_product_id) || {};
+            cart.value.unshift({
+                np: relatedProduct.nama_product || "Tidak Ditemukan",
+                kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
+                deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
+                foto_product: relatedProduct.foto_product || "Tidak Ditemukan",
+                kategori: relatedProduct.kategoris_id || "Tidak Ditemukan",
+                quantity: diskonOrder.target_product_quantity,
+                hb: relatedProduct.harga_beli_product || 0,
+                thb: 0,
+                hj: relatedProduct.harga_product || 0,
+                tt_b: 0,
+                tt_a: 0,
+                total_pajak: 0,
+                note: diskonOrder.nama_diskon,
+                payment: paymentData.value,
+                rounding: rounding.value,
+                total_after_rounding: totalAfterRounding.value,
+                amount_paid: amountPaid.value,
+                change: change.value,
+                orderID: createorderID(),
+                guest: guest.value || '',
+                orderType: orderType.value,
+                table: tableData.value,
+                is_product_diskon: true,
+                id_product: relatedProduct.id || "Tidak Ditemukan",
             });
+        });
     }
 
     const confirmOrder = () => {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DiskonPercentageByOrder;
 use App\Models\DiskonThresholdByOrder;
 use App\Models\DiskonThresholdByProduct;
 use App\Models\Kategori;
@@ -72,6 +73,11 @@ class DataPosController extends Controller
             ['restos_id', '=', Auth::user()->restos_id],
             ['outlets_id', '=', Auth::user()->outlets_id],
         ])->get();
+        $diskonPercentageByOrder = DiskonPercentageByOrder::where([
+            ['restos_id', '=', Auth::user()->restos_id],
+            ['outlets_id', '=', Auth::user()->outlets_id],
+            ['is_active', '=', true],
+        ])->get();
         $namaKasir = Auth::user()->name;
 
         return Inertia::render('POS', [
@@ -82,6 +88,7 @@ class DataPosController extends Controller
             'payment' => $payment,
             'diskonThresholdByOrder' => $diskonThresholdByOrder,
             'diskonThresholdByProduct' => $diskonThresholdByProduct,
+            'diskonPercentageByOrder' => $diskonPercentageByOrder,
             'kategoriDiskons' => $kategoriDiskons,
             'table' => $tables,
             'trackOrder' => $trackOrderData,

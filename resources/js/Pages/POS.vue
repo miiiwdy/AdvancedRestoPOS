@@ -11,6 +11,7 @@
         payment: Array,
         diskonThresholdByOrder: Array,
         diskonThresholdByProduct: Array,
+        diskonPercentageByOrder: Array,
         kategoriDiskons: Array,
         table: Array,
         trackOrder: Array,
@@ -39,6 +40,9 @@
             })) || []),
             ...(props.diskonThresholdByOrder?.map(diskon => ({
                 ...diskon, type: 'order', nama_kategori_diskon: kategoriDiskonMap.get(diskon.kategori_diskons_id) || "Kategori Tidak Ditemukan"
+            })) || []),
+            ...(props.diskonPercentageByOrder?.map(diskon => ({
+                ...diskon, type: 'percentage', nama_kategori_diskon: kategoriDiskonMap.get(diskon.kategori_diskons_id) || "Kategori Tidak Ditemukan"
             })) || [])
         ];
     });

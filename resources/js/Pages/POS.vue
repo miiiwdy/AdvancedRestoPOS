@@ -80,6 +80,7 @@
     const isTableModalOpen = ref(false);
     const isTrackOrderModalOpen = ref(false);
     const isTrackOrderOpen = ref(true);
+    const isSortingModalOpen = ref(false);
     const selectedOrder = ref(null);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
@@ -103,11 +104,61 @@
     const loadedOrders = ref(ordersPerPage);
     const productsPerPage = 20;
     const loadedProducts = ref(productsPerPage);
+    const sortProductNameASC = ref(false);
+    const sortProductNameDSC = ref(false);
+    const sortProductPriceASC = ref(false);
+    const sortProductPriceDSC = ref(false);
     var isCooldown = false;
     var index = 0;
     var isDeleting = false;
     var isConfirmPayment = false;
  
+    const SortProductName_a = () => {
+        if (sortProductNameASC.value === true) {
+            isSortingModalOpen.value = false;
+        }
+        sortProductNameASC.value = true;   
+        sortProductNameDSC.value = false;   
+        sortProductPriceASC.value = false;   
+        sortProductPriceDSC.value = false;   
+        isSortingModalOpen.value = false;
+    }
+    const SortProductName_d = () => {
+        if (sortProductNameDSC.value === true) {
+            isSortingModalOpen.value = false;
+        }
+        sortProductNameDSC.value = true;   
+        sortProductNameASC.value = false;   
+        sortProductPriceASC.value = false;   
+        sortProductPriceDSC.value = false;   
+        isSortingModalOpen.value = false;
+    }
+    const SortProductPrice_a = () => {
+        if (sortProductPriceASC.value === true) {
+            isSortingModalOpen.value = false;
+        }
+        sortProductNameDSC.value = false;   
+        sortProductNameASC.value = false;   
+        sortProductPriceDSC.value = false;   
+        sortProductPriceASC.value = true;   
+        isSortingModalOpen.value = false;
+    }
+    const SortProductPrice_d = () => {
+        if (sortProductPriceDSC.value === true) {
+            isSortingModalOpen.value = false;
+        }
+        sortProductNameDSC.value = false;   
+        sortProductNameASC.value = false;   
+        sortProductPriceASC.value = false;   
+        sortProductPriceDSC.value = true;   
+        isSortingModalOpen.value = false;
+    }
+    const openSortingModal = () => {
+        !isSortingModalOpen.value ? isSortingModalOpen.value = true : isSortingModalOpen.value = false;
+    }
+    const closeSortingModal = () => {
+        isSortingModalOpen.value = false;
+    }
     const toggleCart = () => {
         showCart.value = !showCart.value;
     };
@@ -696,7 +747,7 @@
     const filteredProducts = computed(() => {
         if (!Array.isArray(props.product)) return [];
         const query = searchQuery.value.toLowerCase();
-        return props.product.filter(product => {
+        let filtered = props.product.filter(product => {
             const matchesSearch = product.nama_product.toLowerCase().includes(query);
             if (activeMenu.value === 1337) {
                 return matchesSearch;
@@ -704,7 +755,19 @@
             const matchesCategory = activeMenu.value ? product.kategoris_id === activeMenu.value : true;
             return matchesSearch && matchesCategory;
         });
+        if (sortProductNameASC.value) {
+            filtered.sort((a, b) => a.nama_product.localeCompare(b.nama_product));
+        } else if (sortProductNameDSC.value) {
+            filtered.sort((a, b) => b.nama_product.localeCompare(a.nama_product));
+        } else if (sortProductPriceASC.value) {
+            filtered.sort((a, b) => a.harga_product - b.harga_product);
+        } else if (sortProductPriceDSC.value) {
+            filtered.sort((a, b) => b.harga_product - a.harga_product);
+        }
+
+        return filtered;
     });
+
     const visibleProducts = computed(() => filteredProducts.value.slice(0, loadedProducts.value));
 
     const loadMoreProducts = () => {
@@ -831,6 +894,7 @@
         <FlashMessage class="z-[100]"></FlashMessage>
         <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select">
             <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
+                <!-- headerny -->
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
                     <div class="flex gap-4">
                         <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
@@ -868,13 +932,14 @@
                     </div>
                         </div>
                     </div>
-                <div v-if="!showCart" @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
-                    <i class="ri-file-list-3-line text-current text-xl"></i>
+                    <div v-if="!showCart" @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
+                        <i class="ri-file-list-3-line text-current text-xl"></i>
+                    </div>
                 </div>
-                </div>
-                <div class="flex flex-row h-48 w-[100%] px-4 py-4 pb-4 gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap no-scrollbar">
-                    <div @click="toggleActive(1337)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === 1337 ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
-                        <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === 1337 ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
+                <!-- kategori -->
+                <div class="flex flex-row h-48 px-5 w-full gap-4 overflow-x-auto items-center overflow-y-hidden whitespace-nowrap no-scrollbar">
+                    <div @click="toggleActive(1337)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer', activeMenu === 1337 ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
+                        <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full', activeMenu === 1337 ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                             <i class="ri-restaurant-2-line text-xl text-current"></i>
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
@@ -882,8 +947,8 @@
                             <div class="total_product_in_kategori text-sm text-gray-500">{{ props.product.length }} items</div>
                         </div>
                     </div>  
-                    <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 min-w-48 h-20 rounded-2xl cursor-pointer',activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
-                        <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === kategori.id ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
+                    <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 min-w-48 h-20 rounded-2xl cursor-pointer', activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
+                        <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full', activeMenu === kategori.id ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                             <i class="text-xl text-current" :class="[kategori.icon]"></i>
                         </div>
                         <div class="wrap flex flex-col ml-3 justify-center">
@@ -892,12 +957,19 @@
                         </div>
                     </div>
                 </div>
-                <!-- search -->
-                <div class="flex items-center justify-center w-[97%] h-auto px-1 pr-1 bg-white rounded-full py-1 mx-auto">
-                    <div class="icon flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shrink-0 text-gray-700">
-                        <i class="bi bi-search text-lg text-current"></i>
+                <!-- search and sort -->
+                <div class="flex flex-row h-20 w-[97%]">
+                    <div class="flex items-center w-[94%] pl-2 h-14 bg-white rounded-full mx-4">
+                        <div class="icon flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full shrink-0 text-gray-700">
+                            <i class="bi bi-search text-lg text-current"></i>
+                        </div>
+                        <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" :placeholder="displayPlaceholder"/>
                     </div>
-                    <input v-model="searchQuery" type="text" class="flex-1 bg-transparent px-4 placeholder:text-gray-400 text-gray-700 font-semibold border-none focus:outline-none focus:ring-0" :placeholder="displayPlaceholder"/>
+                    <div @click="openSortingModal()" class="flex items-center justify-center w-[6%] cursor-pointer rounded-3xl bg-[#f0f7ff] border-2 border-[#2D71F8]">
+                        <div class="flex items-center justify-center bg-[#2D71F8] rounded-full w-9 h-9">
+                            <i class="ri-arrow-up-down-line text-white"></i>
+                        </div>
+                    </div>
                 </div>
                 <div id="product-list" class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 mt-5 h-full pb-[15%] overflow-auto">
                     <div v-for="product in visibleProducts":key="product.id" @click="openModal(product)"class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
@@ -1207,6 +1279,24 @@
                             <div v-for="tables in filteredAndSortedTables" :key="tables.id">
                                 <div @click="(confirmTable(tables))" class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">{{ tables.nomor_meja }}</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- sorting produk Modal -->
+                <div v-if="isSortingModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closeSortingModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[31rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                            <h2 class="text-normal font-normal">Product Sorting</h2>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeSortingModal">
+                                <i class="bi bi-x-lg text-current"></i>
+                            </div>
+                        </div>
+                        <div class="flex w-full flex-col px-3 max-h-[30rem] overflow-auto mb-5">
+                            <div @click="SortProductName_a()" class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Name Ascending A-Z</div>
+                            <div @click="SortProductName_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Name Descending A-Z</div>
+                            <div @click="SortProductPrice_a()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Price Ascending (Cheap to Expensive)</div>
+                            <div @click="SortProductPrice_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Price Descending (Expensive to Cheap)</div>
                         </div>
                     </div>
                 </div>

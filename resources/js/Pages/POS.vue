@@ -1,6 +1,6 @@
     <script setup>
     import { router } from '@inertiajs/vue3';
-    import { ref, onMounted, computed, watch } from "vue";
+    import { ref, onMounted, onBeforeUnmount,  computed, watch } from "vue";
     import FlashMessage from '@/Components/FlashMessage.vue';
 
     const props = defineProps({
@@ -81,6 +81,7 @@
     const isTrackOrderModalOpen = ref(false);
     const isTrackOrderOpen = ref(true);
     const isSortingModalOpen = ref(false);
+    const isLogoutModalOpen = ref(false);
     const selectedOrder = ref(null);
     const selectedProduct = ref(null);
     const selectedCartProduct = ref(null);
@@ -112,7 +113,66 @@
     var index = 0;
     var isDeleting = false;
     var isConfirmPayment = false;
- 
+    const iconWidth = ref(36);
+    const isDragging = ref(false);
+    const logoutBtn = ref(null);
+    let wrapWidth = 0;
+    let startX = 0;
+    let dahSampeUjung = false; 
+
+    const getClientX = (e) => {
+        return e.touches ? e.touches[0].clientX : e.clientX;
+    };
+
+    const startDrag = (e) => {
+        isDragging.value = true;
+        dahSampeUjung = false;
+        startX = getClientX(e);
+
+        const wrap = logoutBtn.value.closest('.wrap');
+        wrapWidth = wrap.offsetWidth;
+
+        logoutBtn.value.classList.remove('bounce-left-right');
+
+        window.addEventListener('pointermove', onDrag);
+        window.addEventListener('pointerup', stopDrag);
+        window.addEventListener('touchmove', onDrag);
+        window.addEventListener('touchend', stopDrag);
+    };
+
+
+    const onDrag = (e) => {
+        if (!isDragging.value) return;
+
+        const currentX = getClientX(e);
+        const offset = startX - currentX;
+        const maxWidth = wrapWidth - 20;
+        const newWidth = Math.min(maxWidth, Math.max(36, 36 + offset));
+        iconWidth.value = newWidth;
+
+        if (newWidth >= maxWidth && !dahSampeUjung) {
+            dahSampeUjung = true;
+            logout();
+        }
+    };
+
+
+    const stopDrag = () => {
+    if (isDragging.value) {
+        isDragging.value = false;
+        iconWidth.value = 36;
+        logoutBtn.value.classList.add('bounce-left-right');
+    }
+
+    window.removeEventListener('pointermove', onDrag);
+    window.removeEventListener('pointerup', stopDrag);
+    window.removeEventListener('touchmove', onDrag);
+    window.removeEventListener('touchend', stopDrag);
+    };
+
+    function logout() {
+        router.post(route('logout'))
+    }
     const SortProductName_a = () => {
         if (sortProductNameASC.value === true) {
             isSortingModalOpen.value = false;
@@ -158,6 +218,13 @@
     }
     const closeSortingModal = () => {
         isSortingModalOpen.value = false;
+    }
+
+    const openLogoutModal = () => {
+        !isLogoutModalOpen.value ? isLogoutModalOpen.value = true : isLogoutModalOpen.value = false;
+    }
+    const closeLogoutModal = () => {
+        isLogoutModalOpen.value = false;
     }
     const toggleCart = () => {
         showCart.value = !showCart.value;
@@ -888,6 +955,17 @@
         .no-scrollbar {
             -ms-overflow-style: none;
         }
+        @keyframes bounce-left-right {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(-5px);
+            }
+            }
+            .bounce-left-right {
+            animation: bounce-left-right 2s ease-in-out infinite;
+        }
 
     </style>
     <template>
@@ -897,9 +975,9 @@
                 <!-- headerny -->
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
                     <div class="flex gap-4">
-                        <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
+                        <!-- <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
                             <i class="ri-menu-5-fill text-current text-xl"></i>
-                        </div>
+                        </div> -->
                         <div class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white">
                             <div class="w-9 h-9 rounded-full mx-2 flex items-center justify-center bg-[#f0f7ff]">
                                 <img class="h-6 w-auto" src="../Assets/profileimg.png" alt="">
@@ -915,22 +993,29 @@
                         </div>
                         <div class="tanggal w-60 h-[3.2rem] rounded-full items-center bg-white flex">
                             <div class="wrap px-2 flex flex-row items-center">
-                                <div
-                                class="icon w-9 h-9 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
-                                <i class="ri-calendar-line text-current text-lg"></i>
+                                <div class="icon w-9 h-9 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
+                                    <i class="ri-calendar-line text-current text-lg"></i>
+                                </div>
+                                <p class="text-gray-700 font-medium ml-3">{{ date }}</p>
                             </div>
-                            <p class="text-gray-700 font-medium ml-3">{{ date }}</p>
-                        </div>
                         </div>
                         <div class="jam w-36 h-[3.2rem] rounded-full items-center bg-white flex">
-                        <div class="wrap px-2 flex flex-row items-center">
-                            <div
-                            class="icon w-9 h-9 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
-                            <i class="ri-time-line text-current text-lg"></i>
+                            <div class="wrap px-2 flex flex-row items-center">
+                                <div class="icon w-9 h-9 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8]">
+                                    <i class="ri-time-line text-current text-lg"></i>
+                                </div>
+                                <p class="text-gray-700 font-semibold ml-3">{{ time }} <span class="text-gray-400">{{ period }}</span></p>
+                            </div>
                         </div>
-                        <p class="text-gray-700 font-semibold ml-3">{{ time }} <span class="text-gray-400">{{ period }}</span></p>
-                    </div>
+                        <div class="jam w-auto h-[3.2rem] rounded-full items-center bg-white flex border border-slate-200 cursor-pointer">
+                            <div class="wrap px-2 flex flex-row items-center">
+                                <div class="icon w-9 h-9 bg-[#2D71F8] rounded-full flex items-center justify-center text-white">
+                                    <i class="ri-file-chart-line text-current text-lg"></i>
+                                </div>
+                                <p class="text-gray-700 font-semibold ml-3 pr-5">Sales Report</p>
+                            </div>
                         </div>
+                        
                     </div>
                     <div v-if="!showCart" @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
                         <i class="ri-file-list-3-line text-current text-xl"></i>
@@ -1297,6 +1382,30 @@
                             <div @click="SortProductName_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Name Descending A-Z</div>
                             <div @click="SortProductPrice_a()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Price Ascending (Cheap to Expensive)</div>
                             <div @click="SortProductPrice_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Price Descending (Expensive to Cheap)</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- logout Modal -->
+                <div v-if="isLogoutModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50" @click.self="closeLogoutModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[7rem] -translate-y-1/2 bg-white rounded-2xl w-[31rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                            <h2 class="text-normal font-normal">Log Out</h2>
+                            <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeLogoutModal">
+                                <i class="bi bi-x-lg text-current"></i>
+                            </div>
+                        </div>
+                        <div class="flex w-full items-center justify-center flex-col px-3 max-h-[30rem] overflow-auto mb-5">
+                            <div class="text-gray-700 py-7">Swipe left on the button below to logout</div>
+                            <div class="jam w-52 h-[3.5rem] rounded-full items-center bg-white flex border border-slate-200 mb-7">
+                                <div class="wrap relative w-full px-2 flex items-center justify-start">
+                                    <p class="text-gray-700 font-semibold ml-3 pr-5 relative z-0">Log Out</p>
+                                    <div
+                                        class="icon bounce-left-right h-9 bg-[#FC4A4A] rounded-full flex items-center justify-center text-white cursor-pointer absolute right-2 -top-1/4  z-10 transition-[width] duration-300 ease-in-out" ref="logoutBtn" :style="{ width: `${iconWidth}px` }" @pointerdown="startDrag" @touchstart="startDrag">
+                                        <i class="ri-logout-circle-line text-current text-lg pr-0.5"></i>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

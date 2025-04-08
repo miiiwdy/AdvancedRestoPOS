@@ -178,6 +178,6 @@ class DataPosController extends Controller
             'total_pajak' => $totalPajak,
         ]);
 
-        return redirect()->back()->with('type', 'success')->with('message', 'Order selesai.');
+        return redirect()->back()->with('type', 'success')->with('message', 'Order telah berhasil dilakukan, Terima Kasih.');
     }
 }

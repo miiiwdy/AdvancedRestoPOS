@@ -93,7 +93,7 @@
     const isTableActive = ref(true);
     const guest = ref(0);
     const paymentData = ref('Payment');
-    const placeholderText = "Search something sweet on your mind here...";
+    const placeholderText = "Search product here...";
     const displayPlaceholder = ref("");
     const rounding = ref(0);
     const totalAfterRounding = ref(0);
@@ -360,9 +360,9 @@
         if (!orderID.value) {
             const hurup = Math.random().toString(36).replace(/[^a-z]/g, '').substring(0, 3).toUpperCase();
             const angka = Math.floor(Math.random() * 900) + 100;
-            const ON = hurup + angka;
-            orderID.value = ON;
-            return ON
+            const o_id = hurup + angka;
+            orderID.value = o_id;
+            return o_id
         }
         else {
             return orderID.value;
@@ -882,7 +882,7 @@
                             <div class="total_product_in_kategori text-sm text-gray-500">{{ props.product.length }} items</div>
                         </div>
                     </div>  
-                    <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 w-48 h-20 rounded-2xl cursor-pointer',activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
+                    <div v-for="kategori in kategori" :key="kategori.id" @click="toggleActive(kategori.id)" :class="['flex flex-row py-3 px-3 min-w-48 h-20 rounded-2xl cursor-pointer',activeMenu === kategori.id ? 'bg-[#f0f7ff] outline outline-2 outline-[#2D71F8]' : 'bg-white']">
                         <div :class="['category_icon flex justify-center items-center w-14 h-14 rounded-full',activeMenu === kategori.id ? 'bg-[#2D71F8] text-white' : 'bg-gray-100 text-gray-500']">
                             <i class="text-xl text-current" :class="[kategori.icon]"></i>
                         </div>

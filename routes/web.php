@@ -30,6 +30,12 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+Route::get('/report', function () {
+    return Inertia::render('SalesReport'); 
+});
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/pos', [DataPosController::class, 'index'])->name('pos');
     Route::post('/confirm-order', [DataPosController::class, 'store'])->name('confirm-order');

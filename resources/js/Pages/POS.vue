@@ -975,9 +975,6 @@
                 <!-- headerny -->
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
                     <div class="flex gap-4">
-                        <!-- <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
-                            <i class="ri-menu-5-fill text-current text-xl"></i>
-                        </div> -->
                         <div @click="openLogoutModal()" class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white">
                             <div class="w-9 h-9 rounded-full mx-2 flex items-center justify-center bg-[#f0f7ff]">
                                 <img class="h-6 w-auto" src="../Assets/profileimg.png" alt="">
@@ -1012,7 +1009,7 @@
                                 <div class="icon w-9 h-9 bg-[#2D71F8] rounded-full flex items-center justify-center text-white">
                                     <i class="ri-file-chart-line text-current text-lg"></i>
                                 </div>
-                                <p class="text-gray-700 font-semibold ml-3 pr-5">Sales Report</p>
+                                <p class="text-gray-700 font-semibold ml-3 pr-5">View Sales Report</p>
                             </div>
                         </div>
                         
@@ -1083,7 +1080,7 @@
                         <div v-for="order in visibleOrders":key="order.order_id"class="cursor-pointer flex flex-col border-2 rounded-2xl h-[4.7rem] w-64 py-1 px-3 justify-center"@click="openTrackOrderModal(order)">
                             <div class="flex flex-row justify-between mb-1">
                                 <div class="text-md text-gray-800">#{{ order.order_id }}</div>
-                                <div class="flex justify-center items-center bg-[#ebfff5] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done</div>
+                                <div class="flex justify-center items-center bg-[#f2fff9] text-[0.67rem] text-[#1C8370] rounded-full py-[0.100rem] px-[0.590rem]">All Done</div>
                             </div>
                             <div class="flex flex-row justify-between">
                                 <div class="text-sm text-gray-400 mr-4">{{ order.guest }} Guests • {{ order.order_type }}</div>
@@ -1133,7 +1130,7 @@
                                 <div class="flex flex-col w-full h-50 py-4 mb-1 px-5 justify-between">
                                     <div class="flex flex-row justify-left items-center w-full h-auto mb-2">
                                     <div class="text-xl italic font-medium mr-11 text-gray-800">#{{ selectedOrder?.order_id }}</div>
-                                    <div class="flex justify-center items-center bg-[#ebfff5] text-sm text-[#1C8370] rounded-full py-[0.100rem] px-4">All Done</div>
+                                    <div class="flex justify-center items-center bg-[#f2fff9] text-sm text-[#1C8370] rounded-full py-[0.100rem] px-4">All Done</div>
                                 </div>
                                 <div class="flex flex-row w-auto pb-4 border-b-2 border-dashed text-gray-500">
                                     <div class="flex flex-col mr-8 w-auto">

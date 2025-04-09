@@ -956,11 +956,11 @@
             -ms-overflow-style: none;
         }
         @keyframes bounce-left-right {
-            0%, 100% {
+            0%, 50% {
                 transform: translateX(0);
             }
-            50% {
-                transform: translateX(-5px);
+            100% {
+                transform: translateX(-14px);
             }
             }
             .bounce-left-right {
@@ -978,7 +978,7 @@
                         <!-- <div class="hamburger-menu w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">
                             <i class="ri-menu-5-fill text-current text-xl"></i>
                         </div> -->
-                        <div class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white">
+                        <div @click="openLogoutModal()" class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white">
                             <div class="w-9 h-9 rounded-full mx-2 flex items-center justify-center bg-[#f0f7ff]">
                                 <img class="h-6 w-auto" src="../Assets/profileimg.png" alt="">
                             </div>
@@ -1379,7 +1379,7 @@
                         </div>
                         <div class="flex w-full flex-col px-3 max-h-[30rem] overflow-auto mb-5">
                             <div @click="SortProductName_a()" class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Name Ascending A-Z</div>
-                            <div @click="SortProductName_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Name Descending A-Z</div>
+                            <div @click="SortProductName_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Name Descending Z-A</div>
                             <div @click="SortProductPrice_a()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Price Ascending (Cheap to Expensive)</div>
                             <div @click="SortProductPrice_d()"class="cursor-pointer flex items-center justify-center w-full h-16 mt-4 bg-gray-100 rounded-2xl font-semibold">Product Price Descending (Expensive to Cheap)</div>
                         </div>

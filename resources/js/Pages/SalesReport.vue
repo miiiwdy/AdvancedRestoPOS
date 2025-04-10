@@ -32,6 +32,23 @@ const p_productSales = ref(false);
 const p_totalGuests = ref(false);
 const p_netProfits = ref(false);
 const searchQuery = ref('');
+const selectedOrder = ref(null);
+const isOrderDetailModalOpen = ref(true);
+
+const openOrderDetailModal = (order) => {
+        selectedOrder.value = order;
+        isOrderDetailModalOpen.value = true;
+    };
+
+const closeOrderDetailModal = () => {
+        isOrderDetailModalOpen.value = false;
+        selectedOrder.value = null;
+    };
+const selectedProducts = computed(() => {
+        if (!selectedOrder.value) return [];
+            return props.dataOrderProduct.filter((product) => product.order_id === selectedOrder.value.order_id
+        );
+});
 
 const getCurrentRange = () => {
   let start = new Date(now);
@@ -654,7 +671,7 @@ const formatCurrency = (value) => {
                                     <div class="label text-xs md:text-sm flex-shrink-0 flex items-center justify-center min-w-16 md:min-w-24 px-2 md:px-4 rounded-2xl text-slate-700 font-medium">
                                         {{ order.status || 'DONE' }}
                                     </div>
-                                    <div class="label text-xs md:text-sm flex-shrink-0 flex items-center justify-center min-w-20 md:min-w-28 px-2 md:px-4 rounded-2xl text-[#2D71F8] underline font-medium cursor-pointer">
+                                    <div @click="openOrderDetailModal(order)" class="label text-xs md:text-sm flex-shrink-0 flex items-center justify-center min-w-20 md:min-w-28 px-2 md:px-4 rounded-2xl text-[#2D71F8] underline font-medium cursor-pointer">
                                         Detail
                                     </div>
                                 </div>
@@ -663,6 +680,57 @@ const formatCurrency = (value) => {
                     </div>
                 </div>
             </div>
+            <div v-if="isOrderDetailModalOpen" class="fixed inset-0 flex items-center justify-center bg-slate-400 bg-opacity-50"@click.self="closeOrderDetailModal">
+                    <div class="absolute top-1/2 left-1/3 transform -translate-x-[2rem] -translate-y-1/2 bg-white rounded-2xl w-[35rem] shadow-2xl">
+                        <div class="flex flex-row justify-between items-center justify-center shadow-lg shadow-gray-100 rounded-md p-3 pb-3">
+                            <div class="flex w-9 h-9 bg-white"></div>
+                                <div class="flex flex-col justify-center items-center">
+                                    <h2 class="text-normal font-normal">Order Detail</h2>
+                                </div>
+                                <div class="flex items-center justify-center rounded-full bg-[#fff2f3] w-9 h-9 text-[#FC4A4A] cursor-pointer" @click="closeOrderDetailModal">
+                                    <i class="bi bi-x-lg text-current"></i>
+                                </div>
+                            </div>
+                            <div class="flex w-full flex-col max-h-[34rem] overflow-auto mb-5">
+                                <div class="flex flex-col w-full h-50 py-4 mb-1 px-5 justify-between">
+                                    <div class="flex flex-row justify-left items-center w-full h-auto mb-2">
+                                    <div class="text-xl italic font-medium mr-11 text-gray-800">#{{ selectedOrder?.order_id }}</div>
+                                    <div class="flex justify-center items-center bg-[#f2fff9] text-sm text-[#1C8370] rounded-full py-[0.100rem] px-4">All Done</div>
+                                </div>
+                                <div class="flex flex-row w-auto pb-4 border-b-2 border-dashed text-gray-500">
+                                    <div class="flex flex-col mr-8 w-auto">
+                                        <div class="text-[0.920rem]">Table: {{ selectedOrder?.tables }}</div>
+                                        <div class="text-[0.920rem]">Guest: {{ selectedOrder?.guest }} Guests</div>
+                                    </div>
+                                    <div class="flex flex-col mr-8 w-auto">
+                                        <div class="text-[0.920rem]">Order type: {{ selectedOrder?.order_type }}</div>
+                                        <div class="text-[0.920rem]">Cashier: {{ selectedOrder?.nama_kasir }}</div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <div class="text-[0.920rem]">Date Order:</div>
+                                        <div class="flex justify-center items-start text-[0.920rem]">{{ formattedDataOrderUpdatedAt }}</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col justify-start items-start text-gray-500 w-full h-auto pt-3 pb-4 border-dashed border-b-2">
+                                    <div class="text-[0.920rem]">Total Price: Rp{{ formatCurrency(selectedOrder?.total_harga_after_all) }}</div>
+                                    <div class="text-[0.920rem]">Rounding: {{ selectedOrder?.rounding }}</div>
+                                    <div class="text-[0.920rem]">Amount Paid: Rp{{ formatCurrency(selectedOrder?.amount_paid) }}</div>
+                                    <div class="text-[0.920rem]">Change: Rp{{ formatCurrency(selectedOrder?.change) }}</div>
+                                </div>
+                            </div>
+                            <div class="flex w-full h-auto flex-col">
+                                <div class="flex flex-col max-h-40 w-full mb-4 pb-4 overflow-y-auto shadow-lg shadow-gray-100 rounded-md">
+                                    <div v-for="product in selectedProducts" :key="product.id" class="text-[0.940rem] text-gray-500 px-5 mb-2">
+                                        <span class="mr-3">{{ product.quantity }}x</span>{{ product.nama_product }}
+                                    </div>
+                                </div>
+                                <div class="px-5 text-[0.940rem] text-gray-500 flex items-center">
+                                    <span class="mr-3">Total Order:</span>{{ selectedProducts.length }} Items
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
     </div>
 </template>

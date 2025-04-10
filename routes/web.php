@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DataPosController;
+use App\Http\Controllers\DataReportController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -31,12 +32,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-Route::get('/report', function () {
-    return Inertia::render('SalesReport'); 
-});
-
-
 Route::middleware('auth')->group(function () {
+    Route::get('/report', [DataReportController::class, 'index'])->name('report');
     Route::get('/pos', [DataPosController::class, 'index'])->name('pos');
     Route::post('/confirm-order', [DataPosController::class, 'store'])->name('confirm-order');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -907,7 +907,7 @@
     };
 
     const getProductCount = (categoryId) => {
-    return props.product.filter(product => product.kategoris_id === categoryId).length;
+         return props.product.filter(product => product.kategoris_id === categoryId).length;
     };
 
     const typeEffect = () => {
@@ -1004,14 +1004,14 @@
                                 <p class="text-gray-700 font-semibold ml-3">{{ time }} <span class="text-gray-400">{{ period }}</span></p>
                             </div>
                         </div>
-                        <div class="jam w-auto h-[3.2rem] rounded-full items-center bg-white flex border border-slate-200 cursor-pointer">
+                        <a :href="route('report')" class="jam w-auto h-[3.2rem] rounded-full items-center bg-white flex border border-slate-200 cursor-pointer">
                             <div class="wrap px-2 flex flex-row items-center">
                                 <div class="icon w-9 h-9 bg-[#2D71F8] rounded-full flex items-center justify-center text-white">
                                     <i class="ri-file-chart-line text-current text-lg"></i>
                                 </div>
                                 <p class="text-gray-700 font-semibold ml-3 pr-5">View Sales Report</p>
                             </div>
-                        </div>
+                        </a>
                         
                     </div>
                     <div v-if="!showCart" @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-white text-[#2D71F8] cursor-pointer">

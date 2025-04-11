@@ -465,7 +465,10 @@
     };
 
     const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
-    // const calculateSubtotalForDiskonOrder = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
+    const calculateSubtotalForDiskonOrder = () => {
+        const total = cart.value.reduce((sum, item) => sum + item.tt_b, 0);
+        return total - diskonPercentageAmount.value
+    }
     const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
     const calculateTotal = () => {
         const total = cart.value.reduce((sum, item) => sum + item.tt_a, 0);
@@ -556,6 +559,7 @@
             const isDiskonOrderExist = cart.value.some(c => 
                 props.diskonThresholdByOrder.some(diskon => c.note === diskon.nama_diskon)
             );
+            updateDiscountAfterItemReduction();
 
             const isDiskonProductExist = cart.value.some(c => c.note === props.diskonThresholdByProduct.nama_diskon);
             
@@ -612,6 +616,7 @@
             const decreaseApplicableDiscountOrder = props.diskonThresholdByOrder.filter(
                 (diskonOrder) => calculateSubtotal() < diskonOrder.minimum_order_amount
             );
+            updateDiscountAfterItemReduction();
             if (decreaseApplicableDiscountOrder.length > 0) {
                 for (let i = cart.value.length - 1; i >= 0; i--) {
                     if (cart.value[i].note && decreaseApplicableDiscountOrder.some(d => cart.value[i].note === d.nama_diskon)) {
@@ -715,23 +720,47 @@
             isModalOpen.value = false;
             quantity.value = 1;
             runDiskonByOrderValidation();
-            const subtotal = calculateSubtotal();
-            let totalAfterDiscount = subtotal;
-            const applicableDiscounts = props.diskonPercentageByOrder.filter(item => subtotal >= item.minimum_order_amount).sort((a, b) => b.percentage_value - a.percentage_value);
-            applicableDiscounts.forEach(diskon => {
-                const diskonAmount = totalAfterDiscount * (diskon.percentage_value / 100);
-                diskonPercentageAmount.value = diskonAmount;
-                totalAfterDiscount -= diskonAmount;
-                diskonPercentageID.value.push(diskon.dp_id);
-                console.log(`Applied ${diskon.percentage_value}% discount (ID: ${diskon.dp_id}), new total: ${totalAfterDiscount}`);
-            });
-            console.log('diskonPercentageID:' + diskonPercentageID.value);
-            console.log('diskonPercentageAmount' + diskonPercentageAmount.value);
-            
-            
+            updateDiscountAfterItemReduction();         
         }
     }
+    const updateDiscountAfterItemReduction = () => {
+        const newSubtotal = calculateSubtotal();
+        let newTotalAfterDiscount = newSubtotal;
+        let newTotalDiscountAmount = 0;
 
+        const previouslyAppliedDiscountIds = [...diskonPercentageID.value];
+        diskonPercentageID.value = [];
+        
+        const stillApplicableDiscounts = props.diskonPercentageByOrder
+            .filter(item => newSubtotal >= item.minimum_order_amount)
+            .sort((a, b) => b.percentage_value - a.percentage_value);
+        
+        stillApplicableDiscounts.forEach(diskon => {
+            const diskonAmount = newTotalAfterDiscount * (diskon.percentage_value / 100);
+            newTotalDiscountAmount += diskonAmount;
+            newTotalAfterDiscount -= diskonAmount;
+            diskonPercentageID.value.push(diskon.dp_id);
+            
+            console.log(`Re-applied ${diskon.percentage_value}% discount (ID: ${diskon.dp_id}), discount amount: ${diskonAmount}, new total: ${newTotalAfterDiscount}`);
+        });
+        
+        const removedDiscounts = previouslyAppliedDiscountIds.filter(
+            id => !diskonPercentageID.value.includes(id)
+        );
+        
+        if (removedDiscounts.length > 0) {
+            console.log('Removed discounts due to order amount reduction:', removedDiscounts);
+        }
+        
+        diskonPercentageAmount.value = newTotalDiscountAmount;
+        
+        console.log('Updated total discount amount:', newTotalDiscountAmount);
+        console.log('Updated final total after all discounts:', newTotalAfterDiscount);
+        console.log('Updated diskonPercentageID:', diskonPercentageID.value);
+        
+        return newTotalAfterDiscount;
+    }
+   
     const runDiskonByOrderValidation = () => {
         const applicableDiscountOrder = props.diskonThresholdByOrder.filter((diskonOrder) => calculateSubtotal() >= diskonOrder.minimum_order_amount);
         applicableDiscountOrder.forEach((diskonOrder) => {

@@ -341,11 +341,15 @@ const filteredOrderData = computed(() => {
         console.error('dataOrder is not an array', props.dataOrder);
         return [];
     }
+
     const query = searchQuery.value.toLowerCase().trim();
+    let sortedData = [...props.dataOrder].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
     if (!query) {
-        return [...props.dataOrder];
+        return sortedData;
     }
-    return props.dataOrder.filter(order => {
+
+    return sortedData.filter(order => {
         return (
             (order.order_id && order.order_id.toString().toLowerCase().includes(query)) ||
             (order.nama_kasir && order.nama_kasir.toLowerCase().includes(query)) ||
@@ -353,6 +357,7 @@ const filteredOrderData = computed(() => {
         );
     });
 });
+
 
 const formatDate = (isoString) => {
   return new Date(isoString).toLocaleString('id-ID', {
@@ -364,6 +369,22 @@ const formatDate = (isoString) => {
     second: '2-digit'
   });
 };
+
+const formattedDataOrderUpdatedAt = computed(() => {
+        if (!selectedOrder.value?.updated_at) return "";
+        const date = new Date(selectedOrder.value.updated_at);
+        return new Intl.DateTimeFormat("en-EN", {
+            weekday: "short",
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(date);
+    });
+
 
 const formatCurrency = (value) => {
         if (!value) return "0";

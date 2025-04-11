@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('diskon_percentage_by_orders', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('dp_id');
             $table->foreignId('restos_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('outlets_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('kategori_diskons_id')->nullable()->constrained()->onDelete('cascade');

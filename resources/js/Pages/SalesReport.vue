@@ -7,6 +7,8 @@ const props = defineProps({
     NamaKasir: String,
     dataOrder: Array,
     dataOrderProduct: Array,
+    namaResto: String,
+    namaOutlet: String,
 });
 
 onMounted(() => {
@@ -33,7 +35,7 @@ const p_totalGuests = ref(false);
 const p_netProfits = ref(false);
 const searchQuery = ref('');
 const selectedOrder = ref(null);
-const isOrderDetailModalOpen = ref(true);
+const isOrderDetailModalOpen = ref(false);
 
 const openOrderDetailModal = (order) => {
         selectedOrder.value = order;
@@ -449,7 +451,7 @@ const formatCurrency = (value) => {
                     </div>
                 </div>
                 <div class="flex items-center justify-center gap-3 pr-2">
-                    <div class="text-sm font-medium text-slate-700 pl-3">Marugame Udon | <span class="text-gray-500">Grand Indonesia Mall</span></div>
+                    <div class="text-sm font-medium text-slate-700 pl-3">{{ namaResto }} | <span class="text-gray-500">{{ namaOutlet }}</span></div>
                     <div class="icon w-7 h-7 bg-[#f0f7ff] rounded-full flex items-center justify-center text-[#2D71F8] mr-1">
                         <i class="ri-map-pin-line text-current text-md"></i>
                     </div>

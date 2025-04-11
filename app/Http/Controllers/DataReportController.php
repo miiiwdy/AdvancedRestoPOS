@@ -31,6 +31,9 @@ class DataReportController extends Controller
             ['outlets_id', '=', Auth::user()->outlets_id],
         ])->get();
         $namaKasir = Auth::user()->name;
+        $user = Auth::user();
+        $namaResto = $user->resto ? $user->resto->nama_resto : null;
+        $namaOutlet = $user->outlet ? $user->outlet->nama_outlet : null;
 
         return Inertia::render('SalesReport', [
             'product' => $product,
@@ -38,6 +41,8 @@ class DataReportController extends Controller
             'namaKasir' => $namaKasir,
             'dataOrder' => $dataOrder,
             'dataOrderProduct' => $dataOrderProduct,
+            'namaResto' => $namaResto,
+            'namaOutlet' => $namaOutlet,
         ]);
     }
 }

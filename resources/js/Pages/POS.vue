@@ -48,20 +48,32 @@
     });
 
     const isAnyDiscountApplied = computed(() => {
-        return allActiveDiscounts.value.some(diskon => 
-            cart.value.some(item => item.note === diskon.nama_diskon)
+        const hasThresholdDiscount = allActiveDiscounts.value.some(diskon => 
+            cart.value.some(item => 
+                item.note && item.note.trim().toLowerCase() === diskon.nama_diskon.trim().toLowerCase()
+            )
         );
+        const hasPercentageDiscount = diskonPercentageID.value.length > 0;
+        return hasThresholdDiscount || hasPercentageDiscount;
     });
 
     const usedDiscounts = computed(() => {
-        const filtered = allActiveDiscounts.value.filter(diskon => 
+        const thresholdDiscount = allActiveDiscounts.value.filter(diskon => 
             cart.value
                 .filter(item => item.note && item.note.trim() !== "")
                 .some(item => {
                     return item.note.trim().toLowerCase() === diskon.nama_diskon.trim().toLowerCase();
                 })
         );
-        return filtered;
+        const percentageDiscount = allActiveDiscounts.value.filter(diskon =>
+            diskonPercentageID.value.some(id => String(id) === String(diskon.dp_id))
+        );
+        
+        return {
+            all: [...thresholdDiscount, ...percentageDiscount],
+            threshold: thresholdDiscount,
+            percentage: percentageDiscount
+        };
     });
 
     const time = ref("");
@@ -109,6 +121,8 @@
     const sortProductNameDSC = ref(false);
     const sortProductPriceASC = ref(false);
     const sortProductPriceDSC = ref(false);
+    const diskonPercentageAmount = ref(0);
+    const diskonPercentageID = ref([]);
     var isCooldown = false;
     var index = 0;
     var isDeleting = false;
@@ -451,9 +465,13 @@
     };
 
     const calculateSubtotal = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
+    // const calculateSubtotalForDiskonOrder = () => cart.value.reduce((sum, item) => sum + item.tt_b, 0);
     const calculateTotalPajak = () => cart.value.reduce((sum, item) => sum + item.total_pajak, 0);
-    const calculateTotal = () => cart.value.reduce((sum, item) => sum + item.tt_a, 0);
-    
+    const calculateTotal = () => {
+        const total = cart.value.reduce((sum, item) => sum + item.tt_a, 0);
+        return total - diskonPercentageAmount.value;
+    };
+        
     const totalRounding = () => {
         totalAfterRounding.value = calculateTotal() > 0 ? Math.round(calculateTotal() / 500) * 500 : 0;
         cart.value.forEach(item => {
@@ -694,10 +712,23 @@
                 id_product: selectedProduct.value.id,
             })
             console.log(cart);
-            console.log(cart.value.length);
             isModalOpen.value = false;
             quantity.value = 1;
             runDiskonByOrderValidation();
+            const subtotal = calculateSubtotal();
+            let totalAfterDiscount = subtotal;
+            const applicableDiscounts = props.diskonPercentageByOrder.filter(item => subtotal >= item.minimum_order_amount).sort((a, b) => b.percentage_value - a.percentage_value);
+            applicableDiscounts.forEach(diskon => {
+                const diskonAmount = totalAfterDiscount * (diskon.percentage_value / 100);
+                diskonPercentageAmount.value = diskonAmount;
+                totalAfterDiscount -= diskonAmount;
+                diskonPercentageID.value.push(diskon.dp_id);
+                console.log(`Applied ${diskon.percentage_value}% discount (ID: ${diskon.dp_id}), new total: ${totalAfterDiscount}`);
+            });
+            console.log('diskonPercentageID:' + diskonPercentageID.value);
+            console.log('diskonPercentageAmount' + diskonPercentageAmount.value);
+            
+            
         }
     }
 
@@ -1320,13 +1351,13 @@
                                     <div class="flex w-[25%] h-auto items-center justify-center border-r-2 border-gray-200">
                                         <div class="flex items-center justify-center rounded-full p-2"
                                             :class="{
-                                                'bg-[#d4ffea]': usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon), 
-                                                'bg-rose-200': !usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon)
+                                                'bg-[#d4ffea]': usedDiscounts.all.some(d => d.nama_diskon === diskon.nama_diskon), 
+                                                'bg-rose-200': !usedDiscounts.all.some(d => d.nama_diskon === diskon.nama_diskon)
                                             }">
                                             <div class="p-4 rounded-full" 
                                                 :class="{
-                                                    'bg-[#1C8370]': usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon), 
-                                                    'bg-[#FC4A4A]': !usedDiscounts.some(d => d.nama_diskon === diskon.nama_diskon)
+                                                    'bg-[#1C8370]': usedDiscounts.all.some(d => d.nama_diskon === diskon.nama_diskon), 
+                                                    'bg-[#FC4A4A]': !usedDiscounts.all.some(d => d.nama_diskon === diskon.nama_diskon)
                                                 }">
                                             </div>
                                         </div>
@@ -1337,7 +1368,7 @@
                                         <div class="text-gray-500 text-[1rem] font-medium">{{ diskon.deskripsi_diskon }}</div>
                                     </div>
                                 </div>
-                            </div>  
+                            </div>    
                         </div>
                     </div>
                 </div>
@@ -1522,7 +1553,7 @@
                             </div>
                             <div class="flex flex-row w-full justify-between items-center">
                                 <div class="text-sm font-medium text-[#1C8370]">Discount</div>
-                                <div class="text-sm font-medium text-[#1C8370]">-Rp 0</div>
+                                <div class="text-sm font-medium text-[#1C8370]">-Rp {{ formatCurrency(diskonPercentageAmount) }}</div>
                             </div>
                         </div>
                         <div class="w-full flex-col items-start px-3 pb-2 pt-1 shadow-sm shadow-gray-100">

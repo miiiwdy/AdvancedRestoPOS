@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DataPosController;
 use App\Http\Controllers\DataReportController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -18,14 +19,19 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+// Route::get('/', function () {
+//     return Inertia::render('Welcome', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// });
+Route::get('/redirects', [LoginController::class, 'index'])->name('redirects');
+
+Route::get('/', function() {
+    return redirect('/login');
+})->name('logginn');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

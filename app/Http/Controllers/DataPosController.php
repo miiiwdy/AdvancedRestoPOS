@@ -111,6 +111,7 @@ class DataPosController extends Controller
             'cart.*.amount_paid' => 'required|numeric',
             'cart.*.change' => 'required|numeric',
             'cart.*.total_pajak' => 'required|numeric',
+            'cart.*.payment' => 'required|string',
         ]);
 
         $totalHargaBeli = 0;
@@ -167,6 +168,7 @@ class DataPosController extends Controller
             'rounding' => $request->cart[0]['rounding'],
             'amount_paid' => $request->cart[0]['amount_paid'],
             'change' => $request->cart[0]['change'],
+            'payment' => $request->cart[0]['payment'],
             'total_pajak' => $totalPajak,
             'keuntungan' => $calculateKeuntungan,
         ]);

@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -60,6 +61,15 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('call_number')
                     ->required()
                     ->numeric(),
+                Forms\Components\Select::make('roles')
+                    ->relationship('roles', 'name', function ($query) {
+                        if (Auth::user()->hasRole(2)) {
+                            return $query->whereNotIn('id', [3, 1]);
+
+                        } else if (Auth::user()->hasRole(1)) {
+                            return $query->whereNotIn('id', [3]);
+                        }
+                    }),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
                     ->password()
@@ -70,9 +80,28 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table
+        return $table   
+            ->query(function () {
+                $query = User::query();
+                if (Auth::user()->hasRole(2)) {
+                    $query->whereHas('roles', function ($query) {
+                        $query->where('restos_id', Auth::user()->restos_id)
+                            ->where('outlets_id', Auth::user()->outlets_id)
+                            ->where('roles.id', '=', 4);
+                    })->with('roles');
+                } else if (Auth::user()->hasRole(1)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                        ['email', '!=', Auth::user()->email]
+                    ]);
+                } else if (Auth::user()->hasRole(3)) {
+                    $query->get();
+                }
+                return $query;
+            })
            ->poll('5s')
             ->columns([
+                Tables\Columns\TextColumn::make('roles.name')->badge(), 
                 Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()
                     ->color('success')

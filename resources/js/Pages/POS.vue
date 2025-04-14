@@ -1026,16 +1026,22 @@
             .bounce-left-right {
             animation: bounce-left-right 2s ease-in-out infinite;
         }
+        .unselectable {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
     </style>
     <template>
         <FlashMessage class="z-[100]"></FlashMessage>
-        <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select">
-            <div class="flex flex-col h-screen" :class="showCart ? 'w-[76%]' : 'w-full'">
+        <div class="flex flex-row h-screen w-full bg-[#F8F8F8] tracking-tight overflow-y-hidden no-select unselectable">
+            <div class="flex flex-col h-screen" :class="showCart ? '2xl:w-[76%] lg:w-[74%]' : 'w-full'">
                 <!-- headerny -->
                 <div class="flex flex-row w-full px-4 py-4 pb-1 h-auto items-center gap-4 justify-between">
                     <div class="flex gap-4">
-                        <div @click="openLogoutModal()" class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white">
+                        <div @click="openLogoutModal()" class="flex w-auto pr-5 h-[3.2rem] rounded-full items-center bg-white cursor-pointer">
                             <div class="w-9 h-9 rounded-full mx-2 flex items-center justify-center bg-[#f0f7ff]">
                                 <img class="h-6 w-auto" src="../Assets/profileimg.png" alt="">
                             </div>
@@ -1101,7 +1107,7 @@
                 </div>
                 <!-- search and sort -->
                 <div class="flex flex-row h-20 w-[97%]">
-                    <div class="flex items-center w-[94%] pl-2 h-14 bg-white rounded-full mx-4">
+                    <div class="flex items-center w-[90%] pl-2 h-14 bg-white rounded-full mx-4">
                         <div class="icon flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full shrink-0 text-gray-700">
                             <i class="bi bi-search text-lg text-current"></i>
                         </div>
@@ -1113,12 +1119,12 @@
                         </div>
                     </div>
                 </div>
-                <div id="product-list" class="flex flex-wrap justify-left mx-auto flex-row gap-[1.20rem] w-full px-4 mt-5 h-full pb-[15%] overflow-auto">
-                    <div v-for="product in visibleProducts":key="product.id" @click="openModal(product)"class="flex flex-col px-3 py-3 bg-white w-52 h-64 rounded-xl overflow-hidden cursor-pointer">
+                <div id="product-list" class="inline-flex flex-wrap justify-start mx-auto flex-row 2xl:gap-[1.20rem] lg:gap-[1rem] pl-4 mt-5 h-full pb-[15%] overflow-auto">
+                    <div v-for="product in visibleProducts" :key="product.id" @click="openModal(product)" class="flex-none flex flex-col px-3 py-3 bg-white 2xl:w-52 2xl:h-64 lg:w-48 lg:h-60 rounded-xl overflow-hidden cursor-pointer">
                     <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
-                        <img class="max-h-32 w-auto object-contain":src="'http://127.0.0.1:8000/storage/' + product.foto_product"alt=""/>
+                        <img class="2xl:max-h-32 lg:max-h-24 w-auto object-contain":src="'http://127.0.0.1:8000/storage/' + product.foto_product"alt=""/>
                     </div>
-                    <div class="nama_product text-medium font-semibold text-gray-700 pt-2 text-left">
+                    <div class="nama_product 2xl:text-md lg:text-sm font-semibold text-gray-700 pt-2 text-left">
                         {{ product.nama_product }}
                     </div>
                     <div class="flex flex-row w-full justify-between items-center mt-auto">
@@ -1211,6 +1217,7 @@
                                     <div class="text-[0.920rem]">Rounding: {{ selectedOrder?.rounding }}</div>
                                     <div class="text-[0.920rem]">Amount Paid: Rp{{ formatCurrency(selectedOrder?.amount_paid) }}</div>
                                     <div class="text-[0.920rem]">Change: Rp{{ formatCurrency(selectedOrder?.change) }}</div>
+                                    <div class="text-[0.920rem]">Payment: {{ selectedOrder?.payment }}</div>
                                 </div>
                             </div>
                             <div class="flex w-full h-auto flex-col">
@@ -1468,7 +1475,7 @@
                 </div>
             </div>
             <transition name="slide">
-                <div v-if="showCart" class="cart flex flex-col  w-[32.6%] h-screen bg-white shadow-2xl shadow-slate-100 z-50">
+                <div v-if="showCart" class="cart flex flex-col 2xl:w-[32.6%] lg:w-full h-screen bg-white shadow-2xl shadow-slate-100 z-50">
                     <div class="flex flex-row h-auto w-full px-3 pt-3 pb-3 justify-between items-center shadow-lg shadow-gray-100">
                         <div v-if="showCart" @click="toggleCart" class="cart-btn-before w-[3.2rem] h-[3.2rem] flex items-center justify-center rounded-full bg-gray-100 text-slate-700 cursor-pointer">
                             <i class="ri-file-list-3-line text-current text-xl"></i>
@@ -1545,7 +1552,7 @@
                                     </div>
                                 </div>
                                 <div v-if="!allActiveDiscounts.some(diskon => item.note === diskon.nama_diskon)"
-                                    class="quantity w-[40%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
+                                    class="quantity 2xl:w-[40%] lg:w-[46%] h-9 rounded-full bg-[#F5F5F5] flex flex-row justify-between items-center px-1">
                                     <div @click="decreaseExistQty(item)"
                                         class="flex items-center justify-center bg-white w-7 h-7 rounded-full cursor-pointer">
                                         <i class="bi bi-dash text-xs"></i>

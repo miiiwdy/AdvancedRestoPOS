@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MejaResource\Pages;
 use App\Filament\Resources\MejaResource\RelationManagers;
-use App\Models\KategoriMeja;
 use App\Models\Meja;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class MejaResource extends Resource
 {
@@ -26,6 +26,10 @@ class MejaResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Hidden::make('restos_id')
+                    ->default(Auth::user()->restos_id),
+                Forms\Components\Hidden::make('outlets_id')
+                    ->default(Auth::user()->outlets_id),
                 Forms\Components\TextInput::make('nomor_meja')
                     ->maxLength(255),
             ]);

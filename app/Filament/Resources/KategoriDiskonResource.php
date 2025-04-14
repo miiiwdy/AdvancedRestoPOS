@@ -26,6 +26,23 @@ class KategoriDiskonResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->query(function() {
+                $query = KategoriDiskon::query();
+                if (Auth::user()->hasRole(1)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(2)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                        ['outlets_id', '=', Auth::user()->outlets_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(3)) {
+                    $query::all();
+                }
+            })
             ->schema([
                 Forms\Components\Hidden::make('restos_id')
                     ->default(Auth::user()->restos_id),

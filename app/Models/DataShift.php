@@ -20,4 +20,8 @@ class DataShift extends Model
     {
         return $this->belongsTo(Outlet::class, 'outlets_id');
     }
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

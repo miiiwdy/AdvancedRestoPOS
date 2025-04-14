@@ -64,6 +64,23 @@ class DiskonPercentageByOrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(function() {
+                $query = DiskonPercentageByOrder::query();
+                if (Auth::user()->hasRole(1)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(2)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                        ['outlets_id', '=', Auth::user()->outlets_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(3)) {
+                    $query::all();
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('kategoriDiskon.nama_kategori_diskon')
                     ->badge()

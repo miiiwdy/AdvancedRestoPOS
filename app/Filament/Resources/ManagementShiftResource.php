@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
 
 class ManagementShiftResource extends Resource
 {
@@ -27,13 +28,34 @@ class ManagementShiftResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('shift')
+                ->options(DataShift::where([
+                    ['restos_id', '=', Auth::user()->restos_id],
+                    ['outlets_id', '=', Auth::user()->outlets_id],
+                ])->pluck('nama_shift', 'no_shift'))
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->query(function() {
+                $query = User::query();
+                if (Auth::user()->hasRole(1)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(2)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                        ['outlets_id', '=', Auth::user()->outlets_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(3)) {
+                    $query::all();
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -41,12 +63,14 @@ class ManagementShiftResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\SelectColumn::make('shift')
-                    ->options(DataShift::where([
-                        ['restos_id', '=', Auth::user()->restos_id],
-                        ['outlets_id', '=', Auth::user()->outlets_id],
-                    ])->pluck('nama_shift', 'no_shift'))
-                    ->selectablePlaceholder(false),
+                // Tables\Columns\SelectColumn::make('shift')
+                //     ->options(DataShift::where([
+                //         ['restos_id', '=', Auth::user()->restos_id],
+                //         ['outlets_id', '=', Auth::user()->outlets_id],
+                //     ])->pluck('nama_shift', 'no_shift'))
+                //     ->selectablePlaceholder(false),
+                Tables\Columns\TextColumn::make('shift')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()
                     ->color('success')
@@ -68,6 +92,7 @@ class ManagementShiftResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

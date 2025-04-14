@@ -42,6 +42,23 @@ class PaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(function() {
+                $query = Payment::query();
+                if (Auth::user()->hasRole(1)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(2)) {
+                    $query->where([
+                        ['restos_id', '=', Auth::user()->restos_id],
+                        ['outlets_id', '=', Auth::user()->outlets_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(3)) {
+                    $query::all();
+                }
+            })
            ->poll('5s')
             ->columns([
                 Tables\Columns\TextColumn::make('resto.nama_resto')

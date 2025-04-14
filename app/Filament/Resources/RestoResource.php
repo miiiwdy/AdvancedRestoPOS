@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class RestoResource extends Resource
 {
@@ -43,6 +44,17 @@ class RestoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(function() {
+                $query = Resto::query();
+                if (Auth::user()->hasRole(1)) {
+                    $query->where([
+                        ['id', '=', Auth::user()->restos_id],
+                    ]);
+                }
+                else if (Auth::user()->hasRole(3)) {
+                    $query::all();
+                }
+            })
            ->poll('5s')
             ->columns([
                 Tables\Columns\TextColumn::make('nama_resto')

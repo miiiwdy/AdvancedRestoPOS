@@ -64,10 +64,11 @@ class UserResource extends Resource
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name', function ($query) {
                         if (Auth::user()->hasRole(2)) {
-                            return $query->whereNotIn('id', [3, 1]);
-
-                        } else if (Auth::user()->hasRole(1)) {
-                            return $query->whereNotIn('id', [3]);
+                            return $query->where('id', 4);
+                        } elseif (Auth::user()->hasRole(1)) {
+                            return $query->whereIn('id', [2, 4]);
+                        } elseif (Auth::user()->hasRole(3)) {
+                            return $query;
                         }
                     }),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
@@ -87,6 +88,7 @@ class UserResource extends Resource
                     $query->whereHas('roles', function ($query) {
                         $query->where('restos_id', Auth::user()->restos_id)
                             ->where('outlets_id', Auth::user()->outlets_id)
+                            ->where('email', '!=', Auth::user()->email)
                             ->where('roles.id', '=', 4);
                     })->with('roles');
                 } else if (Auth::user()->hasRole(1)) {

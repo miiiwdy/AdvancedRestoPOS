@@ -143,7 +143,10 @@ class LaporanOrderProductResource extends Resource
                 ExportBulkAction::make()
             ]);
     }
-
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
     public static function canCreate(): bool
     {
         return false;

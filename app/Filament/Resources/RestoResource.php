@@ -52,8 +52,9 @@ class RestoResource extends Resource
                     ]);
                 }
                 else if (Auth::user()->hasRole(3)) {
-                    $query::all();
+                    $query->get();
                 }
+                return $query;
             })
            ->poll('5s')
             ->columns([

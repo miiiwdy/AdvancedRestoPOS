@@ -64,8 +64,9 @@ class DataShiftResource extends Resource
                     ]);
                 }
                 else if (Auth::user()->hasRole(3)) {
-                    $query::all();
+                    $query->get();
                 }
+                return $query;
             })
             ->columns([
                 Tables\Columns\TextColumn::make('no_shift')

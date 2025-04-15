@@ -13,10 +13,10 @@ class LaporanOrderProduct extends Model
     ];
     public function resto()
     {
-        return $this->belongsTo(Resto::class);
+        return $this->belongsTo(Resto::class, 'restos_id');
     }
     public function outlet()
     {
-        return $this->belongsTo(Outlet::class);
+        return $this->belongsTo(Outlet::class, 'outlets_id');
     }
 }

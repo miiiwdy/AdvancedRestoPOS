@@ -4,18 +4,16 @@ import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-        <div>
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-purple-100 to-blue-100 px-4">
+        <div class="mb-6">
             <Link href="/">
-                <!-- <ApplicationLogo class="w-20 h-20 fill-current text-gray-500" /> -->
-                <img class="h-40 w-auto" src="../Assets/arp_logo.png" alt="">
+                <img class="h-28 w-auto" src="../Assets/arp_logo.png" alt="Logo" />
             </Link>
         </div>
 
-        <div
-            class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg"
-        >
+        <div class="w-full sm:max-w-md bg-white p-8 rounded-2xl shadow-xl transition-all duration-300">
             <slot />
         </div>
     </div>
 </template>
+

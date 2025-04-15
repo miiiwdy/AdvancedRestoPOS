@@ -78,8 +78,9 @@ class DiskonPercentageByOrderResource extends Resource
                     ]);
                 }
                 else if (Auth::user()->hasRole(3)) {
-                    $query::all();
+                    $query->get();
                 }
+                return $query;
             })
             ->columns([
                 Tables\Columns\TextColumn::make('kategoriDiskon.nama_kategori_diskon')

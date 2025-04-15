@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PaymentResource\Pages;
-use App\Filament\Resources\PaymentResource\RelationManagers;
-use App\Models\Payment;
+use App\Filament\Resources\LaporanPajakResource\Pages;
+use App\Filament\Resources\LaporanPajakResource\RelationManagers;
+use App\Models\LaporanPajak;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,29 +13,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Enums\FiltersLayout;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
-class PaymentResource extends Resource
+class LaporanPajakResource extends Resource
 {
-    protected static ?string $model = Payment::class;
+    protected static ?string $model = LaporanPajak::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $activeNavigationIcon = 'heroicon-s-credit-card';
-    protected static ?string $navigationLabel = 'Data Payment';
-    protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Laporan Pajak';
+    protected static ?string $navigationGroup = 'Report';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Hidden::make('restos_id')
-                    ->default(Auth::user()->restos_id),
-                Forms\Components\Hidden::make('outlets_id')
-                    ->default(Auth::user()->outlets_id),
-                Forms\Components\TextInput::make('payment_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('rounding_active'),
-                Forms\Components\Toggle::make('is_cash'),
-                Forms\Components\Toggle::make('is_active'),
             ]);
     }
 
@@ -43,7 +37,7 @@ class PaymentResource extends Resource
     {
         return $table
             ->query(function() {
-                $query = Payment::query();
+                $query = LaporanPajak::query();
                 if (Auth::user()->hasRole(1)) {
                     $query->where([
                         ['restos_id', '=', Auth::user()->restos_id],
@@ -60,7 +54,6 @@ class PaymentResource extends Resource
                 }
                 return $query;
             })
-           ->poll('5s')
             ->columns([
                 Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()
@@ -70,11 +63,13 @@ class PaymentResource extends Resource
                     ->badge()
                     ->color('success')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('payment_name')
+                Tables\Columns\TextColumn::make('order_id')
                     ->searchable(),
-                Tables\Columns\ToggleColumn::make('rounding_active'),
-                Tables\Columns\ToggleColumn::make('is_active'),
-                Tables\Columns\ToggleColumn::make('is_cash'),
+                Tables\Columns\TextColumn::make('nama_kasir')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('total_pajak')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -85,8 +80,25 @@ class PaymentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                Filter::make('date_range')
+                    ->form([
+                        DatePicker::make('start_date')
+                            ->label('Start Date')
+                            ->required(),
+                        DatePicker::make('end_date')
+                            ->label('End Date')
+                            ->required(),
+                    ])
+                    ->columns(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            isset($data['start_date']) && isset($data['end_date']),
+                            function (Builder $query) use ($data): Builder {
+                                return $query->whereBetween('created_at', [$data['start_date'], $data['end_date']]);
+                            }
+                        );
+                    }),
+            ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -94,6 +106,7 @@ class PaymentResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+                ExportBulkAction::make()
             ]);
     }
 
@@ -104,11 +117,16 @@ class PaymentResource extends Resource
         ];
     }
 
+    public static function canCreate(): bool {
+        return false;
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPayments::route('/'),
-            'create' => Pages\CreatePayment::route('/create'),
+            'index' => Pages\ListLaporanPajaks::route('/'),
+            'create' => Pages\CreateLaporanPajak::route('/create'),
+            'edit' => Pages\EditLaporanPajak::route('/{record}/edit'),
         ];
     }
 }

@@ -40,8 +40,9 @@ class KategoriDiskonResource extends Resource
                     ]);
                 }
                 else if (Auth::user()->hasRole(3)) {
-                    $query::all();
+                    $query->get();
                 }
+                return $query;
             })
             ->schema([
                 Forms\Components\Hidden::make('restos_id')

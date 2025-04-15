@@ -29,10 +29,13 @@ class LoginController extends Controller
         if (auth()->user()->hasRole(1) || auth()->user()->hasRole(2) || auth()->user()->hasRole(3)) {
             return Inertia::location('/admin');
         } else if (Auth::user()->hasRole(4) && isset($ShiftValidate) && $ShiftValidate) {
-            return Inertia::location('/pos');
+            return redirect('/pos')
+            ->with('type', 'success')->with('message', 'Login berhasil, selamat bekerja.');
         } else {
             Auth::logout();
-            return Inertia::location('/login');
+            // return Inertia::location('/login');
+            return redirect('/login')
+            ->with('type', 'error')->with('message', 'Login gagal, mungkin karena shift Anda tidak sesuai.');
         }
     }
 }

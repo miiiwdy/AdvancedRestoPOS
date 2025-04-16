@@ -44,19 +44,18 @@ class RestoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(function() {
+            ->query(function () {
                 $query = Resto::query();
                 if (Auth::user()->hasRole(1)) {
                     $query->where([
                         ['id', '=', Auth::user()->restos_id],
                     ]);
-                }
-                else if (Auth::user()->hasRole(3)) {
+                } else if (Auth::user()->hasRole(3)) {
                     $query->get();
                 }
                 return $query;
             })
-           ->poll('5s')
+            ->poll('5s')
             ->columns([
                 Tables\Columns\TextColumn::make('nama_resto')
                     ->badge()
@@ -78,6 +77,7 @@ class RestoResource extends Resource
             ->filters([
                 //
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -86,6 +86,14 @@ class RestoResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function canCreate(): bool
+    {
+        if (Auth::user()->hasRole(3)) {
+            return true;
+        }
+        return false;
     }
 
     public static function getRelations(): array

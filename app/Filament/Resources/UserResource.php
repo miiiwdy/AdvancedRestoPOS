@@ -92,10 +92,11 @@ class UserResource extends Resource
                             ->where('roles.id', '=', 4);
                     })->with('roles');
                 } else if (Auth::user()->hasRole(1)) {
-                    $query->where([
-                        ['restos_id', '=', Auth::user()->restos_id],
-                        ['email', '!=', Auth::user()->email]
-                    ]);
+                    $query->where('restos_id', Auth::user()->restos_id)
+                ->where('email', '!=', Auth::user()->email)
+                ->whereHas('roles', function ($q) {
+                    $q->where('id', '!=', 3);
+                });
                 } else if (Auth::user()->hasRole(3)) {
                     $query->get();
                 }

@@ -26,30 +26,40 @@ class OutletResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\Select::make('restos_id')
+        ->schema([
+            Auth::user()->hasRole(3)
+                ? Forms\Components\Select::make('restos_id')
                     ->label('Nama Resto')
                     ->required()
                     ->searchable()
-                    ->getSearchResultsUsing(fn(string $search): array => Resto::where('nama_resto', 'like', "%{$search}%")
-                        ->limit(50)
-                        ->pluck('nama_resto', 'id')
-                        ->toArray())
-                    ->getOptionLabelUsing(fn($value): ?string => Resto::find($value)?->nama_resto)
-                    ->reactive(),
-                Forms\Components\TextInput::make('nama_outlet')
-                    ->placeholder('Nama Outlet')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('deskripsi')
-                    ->placeholder('Deskripsi Outlet')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('alamat')
-                    ->placeholder('Alamat Outlet')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+                    ->getSearchResultsUsing(fn(string $search): array =>
+                        Resto::where('nama_resto', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->pluck('nama_resto', 'id')
+                            ->toArray()
+                    )
+                    ->getOptionLabelUsing(fn($value): ?string =>
+                        Resto::find($value)?->nama_resto
+                    )
+                    ->reactive()
+                : Forms\Components\Hidden::make('restos_id')
+                    ->default(Auth::user()->restos_id),
+        
+            Forms\Components\TextInput::make('nama_outlet')
+                ->placeholder('Nama Outlet')
+                ->required()
+                ->maxLength(255),
+        
+            Forms\Components\TextInput::make('deskripsi')
+                ->placeholder('Deskripsi Outlet')
+                ->required()
+                ->maxLength(255),
+        
+            Forms\Components\TextInput::make('alamat')
+                ->placeholder('Alamat Outlet')
+                ->required()
+                ->maxLength(255),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -115,6 +125,12 @@ class OutletResource extends Resource
         return [
             //
         ];
+    }
+    public static function canCreate(): bool {
+        if (Auth::user()->hasRole(2)) {
+            return false;
+        };
+        return true;
     }
     public static function getNavigationBadge(): ?string
     {

@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class DiskonPercentageByOrder extends Model
 {
     use HasFactory;
+    protected $primaryKey = 'dp_id';
+        public $incrementing = true;
+        protected $keyType = 'int';
+
     protected $guarded = [
         'id',
     ];

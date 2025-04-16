@@ -1400,7 +1400,7 @@
                                     </div>
                                     <div class="flex w-full h-full flex-col px-5 items-start justify-center py-7">
                                         <div class="text-gray-600 text-[1.14rem] font-medium">{{ diskon.nama_diskon }}</div>
-                                        <div class="text-[#2D71F8] text-[0.87rem] font-medium">{{ diskon.nama_kategori_diskon }} <span class="text-gray-500">|| {{ diskon.stok_diskon }} Tersisa </span> </div>
+                                        <div class="text-[#2D71F8] text-[0.87rem] font-medium">{{ diskon.nama_kategori_diskon }}</div>
                                         <div class="text-gray-500 text-[1rem] font-medium">{{ diskon.deskripsi_diskon }}</div>
                                     </div>
                                 </div>

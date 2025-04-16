@@ -42,15 +42,19 @@ class ManagementShiftResource extends Resource
             ->query(function() {
                 $query = User::query();
                 if (Auth::user()->hasRole(1)) {
-                    $query->where([
-                        ['restos_id', '=', Auth::user()->restos_id],
-                    ]);
+                    $query->where('restos_id', Auth::user()->restos_id)
+                        ->where('email', '!=', Auth::user()->email)
+                        ->whereHas('roles', function ($q) {
+                        $q->where('id', '!=', 3);
+                    });
                 }
                 else if (Auth::user()->hasRole(2)) {
-                    $query->where([
-                        ['restos_id', '=', Auth::user()->restos_id],
-                        ['outlets_id', '=', Auth::user()->outlets_id],
-                    ]);
+                    $query->whereHas('roles', function ($query) {
+                        $query->where('restos_id', Auth::user()->restos_id)
+                            ->where('outlets_id', Auth::user()->outlets_id)
+                            ->where('email', '!=', Auth::user()->email)
+                            ->where('roles.id', '=', 4);
+                    })->with('roles');
                 }
                 else if (Auth::user()->hasRole(3)) {
                     $query->get();
@@ -111,7 +115,9 @@ class ManagementShiftResource extends Resource
             //
         ];
     }
-
+    public static function canCreate(): bool {
+        return false;
+    }
     public static function getPages(): array
     {
         return [

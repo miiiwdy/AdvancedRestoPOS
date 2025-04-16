@@ -26,6 +26,20 @@ class KategoriDiskonResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->schema([
+                Forms\Components\Hidden::make('restos_id')
+                    ->default(Auth::user()->restos_id),
+                Forms\Components\Hidden::make('outlets_id')
+                    ->default(Auth::user()->outlets_id),
+                Forms\Components\TextInput::make('nama_kategori_diskon')
+                    ->required()
+                    ->maxLength(255),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
             ->query(function() {
                 $query = KategoriDiskon::query();
                 if (Auth::user()->hasRole(1)) {
@@ -44,20 +58,6 @@ class KategoriDiskonResource extends Resource
                 }
                 return $query;
             })
-            ->schema([
-                Forms\Components\Hidden::make('restos_id')
-                    ->default(Auth::user()->restos_id),
-                Forms\Components\Hidden::make('outlets_id')
-                    ->default(Auth::user()->outlets_id),
-                Forms\Components\TextInput::make('nama_kategori_diskon')
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
             ->columns([
                 Tables\Columns\TextColumn::make('resto.nama_resto')
                     ->badge()

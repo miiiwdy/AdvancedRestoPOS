@@ -53,6 +53,7 @@ class DiskonPercentageByOrderResource extends Resource
                     Forms\Components\TextInput::make('percentage_value')
                     ->suffix('%')
                     ->required()
+                    ->maxValue(75)
                     ->numeric(),
                 Forms\Components\Toggle::make('is_active'),
                 Forms\Components\TextInput::make('stok_diskon')

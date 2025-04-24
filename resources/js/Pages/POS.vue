@@ -355,36 +355,6 @@
         note.value = newValue && newValue.note ? newValue.note : '';
     }, { deep: true });
 
-    const storeAmountPaid = () => {
-        const amountPaidNumber = Number(amountPaid.value.replace(/\D/g, ""));
-        const changeData = amountPaidNumber - totalRounding();
-        change.value = changeData;
-        
-        if (totalRounding() < amountPaidNumber) {
-            cart.value.forEach(item => {
-                item.amount_paid = amountPaidNumber;
-                item.change = changeData;
-            });
-            console.log('kembalian');
-            amountPaid.value = 0;
-            isAmountPaidModalOpen.value = false;
-            isChangeModalOpen.value = true;
-        } 
-        else if (totalRounding() === amountPaidNumber) {
-            cart.value.forEach(item => {
-                item.amount_paid = amountPaidNumber;
-            });
-            console.log('pas');
-            amountPaid.value = 0;
-            isAmountPaidModalOpen.value = false;
-            console.log(cart);
-            
-        } 
-        else {
-            console.warn('uangnya kurang');
-        }
-    };
-
     const closeChangeModal = () => {
         isChangeModalOpen.value = false;
         change.value = 0;
@@ -648,6 +618,8 @@
             const existingProductIndex = cart.value.findIndex(item => item.kode_product === selectedProduct.value.kode_product);
             const totalPajakPerItem =  totalHargaBefore * (props.pajak / 100);
             const totalHargaAfter = totalHargaBefore + totalPajakPerItem;
+            const isDiskonProductExist = cart.value.some(c => c.note === props.diskonThresholdByProduct.nama_diskon);
+            const applicableDiscountProduct = props.diskonThresholdByProduct.filter((diskonProduct) => selectedProduct.value.id === diskonProduct.product_id && quantity.value >= diskonProduct.minimum_items_count);
 
             if (existingProductIndex !== -1) {
                 alert('produk sudah ada di keranjang')
@@ -657,39 +629,38 @@
                 alert('Silakan pilih produk terlebih dahulu.');
                 return;
             }
-
-            const applicableDiscountProduct = props.diskonThresholdByProduct.filter((diskonProduct) => selectedProduct.value.id === diskonProduct.product_id && quantity.value >= diskonProduct.minimum_items_count);
-            applicableDiscountProduct.forEach((diskonProduct) => {
-                const relatedProduct = props.product.find(p => p.id === diskonProduct.target_product_id) || {};
-                cart.value.unshift({
-                    np: relatedProduct.nama_product || "Tidak Ditemukan",
-                    kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
-                    deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
-                    foto_product: relatedProduct.foto_product || "Tidak Ditemukan",
-                    kategori: relatedProduct.kategoris_id || "Tidak Ditemukan",
-                    quantity: diskonProduct.target_product_quantity,
-                    hb: relatedProduct.harga_beli_product || 0,
-                    thb: 0,
-                    hj: relatedProduct.harga_product || 0,
-                    tt_b: 0,
-                    tt_a: 0,
-                    total_pajak: 0,
-                    note: diskonProduct.nama_diskon,
-                    payment: paymentData.value,
-                    rounding: rounding.value,
-                    total_after_rounding: totalAfterRounding.value,
-                    amount_paid: amountPaid.value,
-                    change: change.value,
-                    orderID: createorderID(),
-                    guest: guest.value || '',
-                    orderType: orderType.value,
-                    table: tableData.value,
-                    is_product_diskon: true,
-                    id_product: relatedProduct.id || "Tidak Ditemukan",
+            if (!isDiskonProductExist) {
+                applicableDiscountProduct.forEach((diskonProduct) => {
+                    const relatedProduct = props.product.find(p => p.id === diskonProduct.target_product_id) || {};
+                    cart.value.unshift({
+                        np: relatedProduct.nama_product || "Tidak Ditemukan",
+                        kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
+                        deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
+                        foto_product: relatedProduct.foto_product || "Tidak Ditemukan",
+                        kategori: relatedProduct.kategoris_id || "Tidak Ditemukan",
+                        quantity: diskonProduct.target_product_quantity,
+                        hb: relatedProduct.harga_beli_product || 0,
+                        thb: 0,
+                        hj: relatedProduct.harga_product || 0,
+                        tt_b: 0,
+                        tt_a: 0,
+                        total_pajak: 0,
+                        note: diskonProduct.nama_diskon,
+                        payment: paymentData.value,
+                        rounding: rounding.value,
+                        total_after_rounding: totalAfterRounding.value,
+                        amount_paid: amountPaid.value,
+                        change: change.value,
+                        orderID: createorderID(),
+                        guest: guest.value || '',
+                        orderType: orderType.value,
+                        table: tableData.value,
+                        is_product_diskon: true,
+                        id_product: relatedProduct.id || "Tidak Ditemukan",
+                    });
                 });
-            });
+            }
             console.log("Diskon yang diterapkan:", applicableDiscountProduct);
-
             cart.value.unshift({
                 np: selectedProduct.value.nama_product,
                 kode_product: selectedProduct.value.kode_product,
@@ -740,8 +711,6 @@
             newTotalDiscountAmount += diskonAmount;
             newTotalAfterDiscount -= diskonAmount;
             diskonPercentageID.value.push(diskon.dp_id);
-            
-            console.log(`Re-applied ${diskon.percentage_value}% discount (ID: ${diskon.dp_id}), discount amount: ${diskonAmount}, new total: ${newTotalAfterDiscount}`);
         });
         
         const removedDiscounts = previouslyAppliedDiscountIds.filter(
@@ -753,45 +722,45 @@
         }
         
         diskonPercentageAmount.value = newTotalDiscountAmount;
-        
-        console.log('Updated total discount amount:', newTotalDiscountAmount);
-        console.log('Updated final total after all discounts:', newTotalAfterDiscount);
-        console.log('Updated diskonPercentageID:', diskonPercentageID.value);
-        
         return newTotalAfterDiscount;
     }
    
     const runDiskonByOrderValidation = () => {
-        const applicableDiscountOrder = props.diskonThresholdByOrder.filter((diskonOrder) => calculateSubtotal() >= diskonOrder.minimum_order_amount);
-        applicableDiscountOrder.forEach((diskonOrder) => {
-            const relatedProduct = props.product.find(p => p.id === diskonOrder.target_product_id) || {};
-            cart.value.unshift({
-                np: relatedProduct.nama_product || "Tidak Ditemukan",
-                kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
-                deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
-                foto_product: relatedProduct.foto_product || "Tidak Ditemukan",
-                kategori: relatedProduct.kategoris_id || "Tidak Ditemukan",
-                quantity: diskonOrder.target_product_quantity,
-                hb: relatedProduct.harga_beli_product || 0,
-                thb: 0,
-                hj: relatedProduct.harga_product || 0,
-                tt_b: 0,
-                tt_a: 0,
-                total_pajak: 0,
-                note: diskonOrder.nama_diskon,
-                payment: paymentData.value,
-                rounding: rounding.value,
-                total_after_rounding: totalAfterRounding.value,
-                amount_paid: amountPaid.value,
-                change: change.value,
-                orderID: createorderID(),
-                guest: guest.value || '',
-                orderType: orderType.value,
-                table: tableData.value,
-                is_product_diskon: true,
-                id_product: relatedProduct.id || "Tidak Ditemukan",
+        const isDiskonOrderExist = cart.value.some(c => 
+                props.diskonThresholdByOrder.some(diskon => c.note === diskon.nama_diskon)
+            );
+            const applicableDiscountOrder = props.diskonThresholdByOrder.filter((diskonOrder) => calculateSubtotal() >= diskonOrder.minimum_order_amount);
+        if (!isDiskonOrderExist) {
+            applicableDiscountOrder.forEach((diskonOrder) => {
+                const relatedProduct = props.product.find(p => p.id === diskonOrder.target_product_id) || {};
+                cart.value.unshift({
+                    np: relatedProduct.nama_product || "Tidak Ditemukan",
+                    kode_product: relatedProduct.kode_product || "Tidak Ditemukan",
+                    deskripsi_product: relatedProduct.deskripsi_product || "Tidak Ditemukan",
+                    foto_product: relatedProduct.foto_product || "Tidak Ditemukan",
+                    kategori: relatedProduct.kategoris_id || "Tidak Ditemukan",
+                    quantity: diskonOrder.target_product_quantity,
+                    hb: relatedProduct.harga_beli_product || 0,
+                    thb: 0,
+                    hj: relatedProduct.harga_product || 0,
+                    tt_b: 0,
+                    tt_a: 0,
+                    total_pajak: 0,
+                    note: diskonOrder.nama_diskon,
+                    payment: paymentData.value,
+                    rounding: rounding.value,
+                    total_after_rounding: totalAfterRounding.value,
+                    amount_paid: amountPaid.value,
+                    change: change.value,
+                    orderID: createorderID(),
+                    guest: guest.value || '',
+                    orderType: orderType.value,
+                    table: tableData.value,
+                    is_product_diskon: true,
+                    id_product: relatedProduct.id || "Tidak Ditemukan",
+                });
             });
-        });
+        }
     }
 
     const confirmOrder = () => {
@@ -814,23 +783,74 @@
             isPaymentModalOpen.value = true;
             return;
         }
+
         router.post('/confirm-order', { cart: cart.value }, {
             onSuccess: () => {
-                console.log('Checkout berhasil');
-                cart.value = [];
-                paymentData.value = "Payment";
-                orderType.value = "Dine In";
-                orderID.value = '';
-                guest.value = 0;
-                tableData.value = '';
-                isConfirmPayment = false;
+            console.log('Checkout berhasil');
+            
+            const printData = {
+                orderId: orderID.value,
+                table: tableData.value,
+                guest: guest.value,
+                orderType: orderType.value,
+                cashierName: props.namaKasir,
+                currentDate: new Date().toLocaleString(),
+                totalPrice: calculateTotal(),
+                rounding: rounding.value,
+                amountPaid: amountPaid.value,
+                change: change.value,
+                paymentMethod: paymentData.value,
+                products: cart.value,
+            };
+            console.log(printData);
+            
+
+            localStorage.setItem('printData', JSON.stringify(printData));
+            cart.value = [];
+            paymentData.value = "Payment";
+            orderType.value = "Dine In";
+            orderID.value = '';
+            guest.value = 0;
+            tableData.value = '';
+            isConfirmPayment = false;
+
+            window.open('/print-receipt', '_blank');
             },
             onError: (errors) => {
-                console.error("Gagal checkout:", errors);
+            console.error("Gagal checkout:", errors);
             }
         });
-    }
+    };
 
+    const storeAmountPaid = () => {
+        const amountPaidNumber = Number(amountPaid.value.replace(/\D/g, ""));
+        const changeData = amountPaidNumber - totalRounding();
+        change.value = changeData;
+        
+        if (totalRounding() < amountPaidNumber) {
+            cart.value.forEach(item => {
+                item.amount_paid = amountPaidNumber;
+                item.change = changeData;
+            });
+            console.log('kembalian');
+            amountPaid.value = 0;
+            isAmountPaidModalOpen.value = false;
+            isChangeModalOpen.value = true;
+        } 
+        else if (totalRounding() === amountPaidNumber) {
+            cart.value.forEach(item => {
+                item.amount_paid = amountPaidNumber;
+            });
+            console.log('pas');
+            amountPaid.value = 0;
+            isAmountPaidModalOpen.value = false;
+            console.log(cart);
+            
+        } 
+        else {
+            console.warn('uangnya kurang');
+        }
+    };
     const removeFromCart = (index) => {
         if (isCooldown) {      
             console.log('cooldown');
@@ -1122,7 +1142,7 @@
                 <div id="product-list" class="inline-flex flex-wrap justify-start mx-auto flex-row 2xl:gap-[1.20rem] lg:gap-[1rem] pl-4 mt-5 h-full pb-[15%] overflow-auto">
                     <div v-for="product in visibleProducts" :key="product.id" @click="openModal(product)" class="flex-none flex flex-col px-3 py-3 bg-white 2xl:w-52 2xl:h-64 lg:w-48 lg:h-60 rounded-xl overflow-hidden cursor-pointer">
                     <div class="img rounded-xl w-full h-[65%] bg-[#F6F6F6] flex justify-center items-center">
-                        <img class="2xl:max-h-32 lg:max-h-24 w-auto object-contain":src="'http://127.0.0.1:8000/storage/' + product.foto_product"alt=""/>
+                        <img class="2xl:max-h-32 lg:max-h-24 max-h-32 w-auto object-contain":src="'http://127.0.0.1:8000/storage/' + product.foto_product"alt=""/>
                     </div>
                     <div class="nama_product 2xl:text-md lg:text-sm font-semibold text-gray-700 pt-2 text-left">
                         {{ product.nama_product }}
